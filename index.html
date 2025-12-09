@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Finance - Lično Finansijsko Praćenje</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <h1>💰 My Finance</h1>
+            <div class="exchange-rate" id="exchangeRateDisplay">
+                <span id="rateValue">Učitavanje kursa...</span>
+                <button id="refreshRate" class="icon-btn" title="Osveži kurs">🔄</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="container">
+            <button class="nav-btn active" data-section="dashboard">📊 Dashboard</button>
+            <button class="nav-btn" data-section="monthly">📅 Mesečni Unosi</button>
+            <button class="nav-btn" data-section="card">💳 Kartica/Račun</button>
+            <button class="nav-btn" data-section="cash">💶 Kućna Gotovina</button>
+            <button class="nav-btn" data-section="deposits">🏦 Oročena Štednja</button>
+            <button class="nav-btn" data-section="settings">⚙️ Podešavanja</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="section active">
+                <h2>Pregled Ukupnog Bogatstva</h2>
+                
+                <div class="cards-grid">
+                    <div class="glass-card">
+                        <h3>💵 RSD Mesečni Saldo</h3>
+                        <div class="amount" id="totalMonthlyRSD">0 RSD</div>
+                        <small>Prihodi minus troškovi</small>
+                    </div>
+                    
+                    <div class="glass-card">
+                        <h3>💳 Stanje Kartice</h3>
+                        <div class="amount" id="totalCardRSD">0 RSD</div>
+                        <small>Tekući račun</small>
+                    </div>
+                    
+                    <div class="glass-card">
+                        <h3>💶 Kućna Gotovina</h3>
+                        <div class="amount" id="totalCashEUR">0 EUR</div>
+                        <div class="amount-small" id="totalCashRSD">0 RSD</div>
+                    </div>
+                    
+                    <div class="glass-card">
+                        <h3>🏦 Oročeni Depoziti</h3>
+                        <div class="amount" id="totalDepositsRSD">0 RSD</div>
+                        <small id="activeDepositsCount">0 aktivnih</small>
+                    </div>
+                </div>
+
+                <div class="glass-card total-wealth">
+                    <h2>💎 UKUPNO BOGATSTVO</h2>
+                    <div class="total-amount" id="totalWealth">0 RSD</div>
+                </div>
+
+                <div class="glass-card">
+                    <h3>📈 Godišnji Pregled</h3>
+                    <div id="yearlyOverview"></div>
+                </div>
+            </section>
+
+            <!-- Monthly Entries Section -->
+            <section id="monthly" class="section">
+                <h2>📅 Mesečni Prihodi i Troškovi</h2>
+                
+                <div class="glass-card">
+                    <h3>Dodaj Novi Unos</h3>
+                    <form id="monthlyForm" class="form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Godina</label>
+                                <input type="number" id="monthlyYear" min="2020" max="2100" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Mesec</label>
+                                <select id="monthlyMonth" required>
+                                    <option value="1">Januar</option>
+                                    <option value="2">Februar</option>
+                                    <option value="3">Mart</option>
+                                    <option value="4">April</option>
+                                    <option value="5">Maj</option>
+                                    <option value="6">Jun</option>
+                                    <option value="7">Jul</option>
+                                    <option value="8">Avgust</option>
+                                    <option value="9">Septembar</option>
+                                    <option value="10">Oktobar</option>
+                                    <option value="11">Novembar</option>
+                                    <option value="12">Decembar</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Opis</label>
+                            <input type="text" id="monthlyDescription" required>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Tip</label>
+                                <select id="monthlyType" required>
+                                    <option value="income">Prihod</option>
+                                    <option value="expense">Trošak</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Iznos (RSD)</label>
+                                <input type="number" id="monthlyAmount" step="0.01" required>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn">Dodaj Unos</button>
+                    </form>
+                </div>
+
+                <div class="glass-card">
+                    <h3>Svi Unosi</h3>
+                    <div class="filter-controls">
+                        <select id="filterYear">
+                            <option value="">Sve godine</option>
+                        </select>
+                        <select id="filterMonth">
+                            <option value="">Svi meseci</option>
+                            <option value="1">Januar</option>
+                            <option value="2">Februar</option>
+                            <option value="3">Mart</option>
+                            <option value="4">April</option>
+                            <option value="5">Maj</option>
+                            <option value="6">Jun</option>
+                            <option value="7">Jul</option>
+                            <option value="8">Avgust</option>
+                            <option value="9">Septembar</option>
+                            <option value="10">Oktobar</option>
+                            <option value="11">Novembar</option>
+                            <option value="12">Decembar</option>
+                        </select>
+                    </div>
+                    <div id="monthlyEntriesList" class="entries-list"></div>
+                </div>
+            </section>
+
+            <!-- Card/Account Section -->
+            <section id="card" class="section">
+                <h2>💳 Kartica i Tekući Račun (RSD)</h2>
+                
+                <div class="glass-card balance-display">
+                    <h3>Trenutno Stanje</h3>
+                    <div class="amount large" id="cardBalance">0 RSD</div>
+                </div>
+
+                <div class="glass-card">
+                    <h3>Nova Transakcija</h3>
+                    <form id="cardForm" class="form">
+                        <div class="form-group">
+                            <label>Opis</label>
+                            <input type="text" id="cardDescription" required>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Tip</label>
+                                <select id="cardType" required>
+                                    <option value="income">Primanje (Plata)</option>
+                                    <option value="expense">Trošenje</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Iznos (RSD)</label>
+                                <input type="number" id="cardAmount" step="0.01" required>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn">Dodaj Transakciju</button>
+                    </form>
+                </div>
+
+                <div class="glass-card">
+                    <h3>Istorija Transakcija</h3>
+                    <div id="cardTransactionsList" class="entries-list"></div>
+                </div>
+            </section>
+
+            <!-- Cash EUR Section -->
+            <section id="cash" class="section">
+                <h2>💶 Kućna Gotovina (EUR)</h2>
+                
+                <div class="glass-card balance-display">
+                    <h3>Trenutno Stanje</h3>
+                    <div class="amount large" id="cashBalance">0 EUR</div>
+                    <div class="amount-small" id="cashBalanceRSD">0 RSD</div>
+                </div>
+
+                <div class="glass-card">
+                    <h3>Nova Promena</h3>
+                    <form id="cashForm" class="form">
+                        <div class="form-group">
+                            <label>Opis</label>
+                            <input type="text" id="cashDescription" required>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Tip</label>
+                                <select id="cashType" required>
+                                    <option value="add">Dodavanje</option>
+                                    <option value="subtract">Oduzimanje</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Iznos (EUR)</label>
+                                <input type="number" id="cashAmount" step="0.01" required>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn">Sačuvaj Promenu</button>
+                    </form>
+                </div>
+
+                <div class="glass-card">
+                    <h3>Istorija Promena</h3>
+                    <div id="cashHistoryList" class="entries-list"></div>
+                </div>
+            </section>
+
+            <!-- Term Deposits Section -->
+            <section id="deposits" class="section">
+                <h2>🏦 Oročena Štednja</h2>
+                
+                <div class="glass-card">
+                    <h3>Dodaj Novi Depozit</h3>
+                    <form id="depositForm" class="form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Iznos (RSD)</label>
+                                <input type="number" id="depositAmount" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Trajanje</label>
+                                <select id="depositDuration" required>
+                                    <option value="3">3 meseca</option>
+                                    <option value="6">6 meseci</option>
+                                    <option value="12">12 meseci</option>
+                                    <option value="24">24 meseca</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Tip Kamate</label>
+                                <select id="depositInterestType" required>
+                                    <option value="simple">Prosta kamata</option>
+                                    <option value="compound">Složena kamata</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Godišnja Kamata (%)</label>
+                                <input type="number" id="depositInterestRate" step="0.01" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Datum Početka</label>
+                            <input type="date" id="depositStartDate" required>
+                        </div>
+                        
+                        <button type="submit" class="btn">Dodaj Depozit</button>
+                    </form>
+                </div>
+
+                <div class="glass-card">
+                    <h3>Aktivni Depoziti</h3>
+                    <div id="depositsList" class="entries-list"></div>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settings" class="section">
+                <h2>⚙️ Podešavanja</h2>
+                
+                <div class="glass-card">
+                    <h3>Kurs EUR/RSD</h3>
+                    <div class="exchange-info">
+                        <p>Trenutni kurs: <strong id="settingsRate">117.00</strong> RSD</p>
+                        <p>Poslednje ažuriranje: <span id="lastUpdate">-</span></p>
+                        <button id="manualRefreshRate" class="btn">Osveži Kurs</button>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <h3>Backup i Restore</h3>
+                    <button id="exportData" class="btn">📥 Export Data (JSON)</button>
+                    <button id="importData" class="btn">📤 Import Data (JSON)</button>
+                    <input type="file" id="importFile" accept=".json" style="display: none;">
+                    <p class="help-text">Redovno pravite backup svojih podataka!</p>
+                </div>
+
+                <div class="glass-card">
+                    <h3>Reset Podataka</h3>
+                    <button id="resetData" class="btn btn-danger">🗑️ Obriši Sve Podatke</button>
+                    <p class="help-text warning">⚠️ Ova akcija je nepovratna!</p>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 My Finance | Lično Finansijsko Praćenje</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
