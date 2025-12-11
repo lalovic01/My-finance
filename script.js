@@ -391,7 +391,11 @@ const UIController = {
         this.refresh();
         this.updateExchangeRateDisplay();
         
-        // Postavi trenutnu godinu i mesec u formu
+        // Inicijalizuj grafikone nakon što se učitaju podaci
+        setTimeout(() => {
+            ChartModule.initCharts();
+        }, 500);
+        
         const now = new Date();
         document.getElementById('salaryYear').value = now.getFullYear();
         document.getElementById('salaryMonth').value = now.getMonth() + 1;
@@ -589,6 +593,11 @@ const UIController = {
         this.refreshCashHistory();
         this.refreshDeposits();
         this.populateYearFilter();
+        
+        // Osvežava grafikone
+        if (typeof Chart !== 'undefined') {
+            ChartModule.refreshCharts();
+        }
     },
     
     /**
@@ -935,3 +944,271 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     console.log('✅ App Ready');
 });
+
+// ========================================
+// CHARTS - Grafikon moduli
+// ========================================
+
+const ChartModule = {
+    charts: {
+        wealthPie: null,
+        salaryBar: null,
+        salaryLine: null
+    },
+    
+    /**
+     * Inicijalizuje sve grafikone
+     */
+    initCharts() {
+        this.createWealthPieChart();
+        this.createSalaryBarChart();
+        this.createSalaryLineChart();
+    },
+    
+    /**
+     * Kreira pie chart za distribuciju bogatstva
+     */
+    createWealthPieChart() {
+        const ctx = document.getElementById('wealthPieChart');
+        if (!ctx) return;
+        
+        const cardBalance = Calculator.calculateCardBalance();
+        const cashEUR = Calculator.calculateCashBalance();
+        const cashRSD = Calculator.convertEURtoRSD(cashEUR);
+        const depositsRSD = Calculator.calculateTotalDepositsValue();
+        
+        // Uništi postojeći chart ako postoji
+        if (this.charts.wealthPie) {
+            this.charts.wealthPie.destroy();
+        }
+        
+        this.charts.wealthPie = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Kartica', 'Gotovina (EUR)', 'Depoziti'],
+                datasets: [{
+                    data: [cardBalance, cashRSD, depositsRSD],
+                    backgroundColor: [
+                        'rgba(99, 102, 241, 0.8)',
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(139, 92, 246, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(99, 102, 241, 1)',
+                        'rgba(16, 185, 129, 1)',
+                        'rgba(139, 92, 246, 1)'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: 'white',
+                            font: {
+                                size: 12
+                            },
+                            padding: 15
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed || 0;
+                                return label + ': ' + new Intl.NumberFormat('sr-RS').format(value) + ' RSD';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    },
+    
+    /**
+     * Kreira bar chart za godišnju zaradu
+     */
+    createSalaryBarChart() {
+        const ctx = document.getElementById('salaryBarChart');
+        if (!ctx) return;
+        
+        const summary = Calculator.generateYearlySummary();
+        const years = Object.keys(summary).sort();
+        const totals = years.map(year => summary[year].total);
+        
+        // Uništi postojeći chart ako postoji
+        if (this.charts.salaryBar) {
+            this.charts.salaryBar.destroy();
+        }
+        
+        this.charts.salaryBar = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: years,
+                datasets: [{
+                    label: 'Godišnja Zarada (RSD)',
+                    data: totals,
+                    backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                    borderColor: 'rgba(16, 185, 129, 1)',
+                    borderWidth: 2,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Zarada: ' + new Intl.NumberFormat('sr-RS').format(context.parsed.y) + ' RSD';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: 'white',
+                            callback: function(value) {
+                                return new Intl.NumberFormat('sr-RS', {
+                                    notation: 'compact',
+                                    compactDisplay: 'short'
+                                }).format(value);
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: 'white'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    }
+                }
+            }
+        });
+    },
+    
+    /**
+     * Kreira line chart za mesečni trend zarade
+     */
+    createSalaryLineChart() {
+        const ctx = document.getElementById('salaryLineChart');
+        if (!ctx) return;
+        
+        // Grupiši po godini i mesecu
+        const monthlyData = {};
+        AppState.salaryEntries.forEach(entry => {
+            const key = `${entry.year}-${String(entry.month).padStart(2, '0')}`;
+            if (!monthlyData[key]) {
+                monthlyData[key] = 0;
+            }
+            monthlyData[key] += entry.amount;
+        });
+        
+        // Sortiraj po datumu
+        const sortedKeys = Object.keys(monthlyData).sort();
+        const labels = sortedKeys.map(key => {
+            const [year, month] = key.split('-');
+            return `${month}/${year}`;
+        });
+        const values = sortedKeys.map(key => monthlyData[key]);
+        
+        // Uništi postojeći chart ako postoji
+        if (this.charts.salaryLine) {
+            this.charts.salaryLine.destroy();
+        }
+        
+        this.charts.salaryLine = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Mesečna Zarada',
+                    data: values,
+                    borderColor: 'rgba(99, 102, 241, 1)',
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: 'rgba(99, 102, 241, 1)',
+                    pointBorderColor: 'white',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: {
+                            color: 'white',
+                            font: {
+                                size: 14
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Zarada: ' + new Intl.NumberFormat('sr-RS').format(context.parsed.y) + ' RSD';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: 'white',
+                            callback: function(value) {
+                                return new Intl.NumberFormat('sr-RS', {
+                                    notation: 'compact',
+                                    compactDisplay: 'short'
+                                }).format(value);
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: 'white',
+                            maxRotation: 45,
+                            minRotation: 45
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    }
+                }
+            }
+        });
+    },
+    
+    /**
+     * Osvežava sve grafikone sa novim podacima
+     */
+    refreshCharts() {
+        this.createWealthPieChart();
+        this.createSalaryBarChart();
+        this.createSalaryLineChart();
+    }
+};
