@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Finance - Lično Finansijsko Praćenje</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
     <!-- Header -->
@@ -76,6 +78,30 @@
                         ℹ️ Ovaj pregled prikazuje koliko ste zaradili kroz godine. Ne utiče na ukupno bogatstvo.
                     </p>
                     <div id="yearlyOverview"></div>
+                </div>
+
+                <!-- NOVI DEO: Grafikoni -->
+                <div class="glass-card">
+                    <h3>📊 Vizuelni Pregled</h3>
+                    
+                    <div class="charts-grid">
+                        <div class="chart-container">
+                            <h4 style="color: white; margin-bottom: 16px;">Distribucija Bogatstva</h4>
+                            <canvas id="wealthPieChart"></canvas>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <h4 style="color: white; margin-bottom: 16px;">Godišnja Zarada</h4>
+                            <canvas id="salaryBarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <h3>📈 Mesečni Trend Zarade</h3>
+                    <div class="chart-container-wide">
+                        <canvas id="salaryLineChart"></canvas>
+                    </div>
                 </div>
             </section>
 
