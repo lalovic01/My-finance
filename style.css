@@ -202,6 +202,19 @@ body {
     margin-bottom: 30px;
 }
 
+.stat-card {
+    border: 2px dashed rgba(255, 193, 7, 0.5) !important;
+    background: rgba(255, 193, 7, 0.05) !important;
+}
+
+.stat-note {
+    display: block;
+    color: var(--warning);
+    font-weight: 600;
+    font-size: 12px;
+    margin-top: 8px;
+}
+
 .amount {
     font-size: 32px;
     font-weight: 700;
@@ -768,4 +781,26 @@ body {
 
 .loading {
     animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* ========================================
+   INFO BANNER
+======================================== */
+
+.info-banner {
+    background: rgba(99, 102, 241, 0.15) !important;
+    border-left: 4px solid var(--primary);
+    padding: 16px 20px;
+    margin-bottom: 24px;
+}
+
+.info-banner p {
+    color: white;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.info-banner strong {
+    color: var(--primary-light);
 }
