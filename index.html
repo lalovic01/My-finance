@@ -22,7 +22,7 @@
     <nav class="nav">
         <div class="container">
             <button class="nav-btn active" data-section="dashboard">📊 Dashboard</button>
-            <button class="nav-btn" data-section="monthly">📅 Mesečni Unosi</button>
+            <button class="nav-btn" data-section="salary">💼 Plata/Zarada</button>
             <button class="nav-btn" data-section="card">💳 Kartica/Račun</button>
             <button class="nav-btn" data-section="cash">💶 Kućna Gotovina</button>
             <button class="nav-btn" data-section="deposits">🏦 Oročena Štednja</button>
@@ -39,10 +39,10 @@
                 <h2>Pregled Ukupnog Bogatstva</h2>
                 
                 <div class="cards-grid">
-                    <div class="glass-card">
-                        <h3>💵 RSD Mesečni Saldo</h3>
-                        <div class="amount" id="totalMonthlyRSD">0 RSD</div>
-                        <small>Prihodi minus troškovi</small>
+                    <div class="glass-card stat-card">
+                        <h3>💼 Ukupna Zarada</h3>
+                        <div class="amount" id="totalSalaryRSD">0 RSD</div>
+                        <small class="stat-note">⚠️ Samo statistika (ne ulazi u ukupno)</small>
                     </div>
                     
                     <div class="glass-card">
@@ -67,29 +67,38 @@
                 <div class="glass-card total-wealth">
                     <h2>💎 UKUPNO BOGATSTVO</h2>
                     <div class="total-amount" id="totalWealth">0 RSD</div>
+                    <small style="opacity: 0.8; font-size: 14px;">Kartica + Gotovina + Depoziti</small>
                 </div>
 
                 <div class="glass-card">
-                    <h3>📈 Godišnji Pregled</h3>
+                    <h3>📈 Godišnji Pregled Zarade (Samo Statistika)</h3>
+                    <p style="color: rgba(255, 255, 255, 0.7); font-size: 14px; margin-bottom: 16px;">
+                        ℹ️ Ovaj pregled prikazuje koliko ste zaradili kroz godine. Ne utiče na ukupno bogatstvo.
+                    </p>
                     <div id="yearlyOverview"></div>
                 </div>
             </section>
 
-            <!-- Monthly Entries Section -->
-            <section id="monthly" class="section">
-                <h2>📅 Mesečni Prihodi i Troškovi</h2>
+            <!-- Salary Section -->
+            <section id="salary" class="section">
+                <h2>💼 Plata i Zarada</h2>
+                
+                <div class="glass-card info-banner">
+                    <p>ℹ️ <strong>Napomena:</strong> Ovde unosite samo prihode (platu, bonuse, nagrade) za praćenje koliko ste zaradili kroz godine. 
+                    Ovi podaci ne utiču na ukupno bogatstvo prikazano na Dashboard-u.</p>
+                </div>
                 
                 <div class="glass-card">
-                    <h3>Dodaj Novi Unos</h3>
-                    <form id="monthlyForm" class="form">
+                    <h3>Dodaj Novu Zaradu</h3>
+                    <form id="salaryForm" class="form">
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Godina</label>
-                                <input type="number" id="monthlyYear" min="2020" max="2100" required>
+                                <input type="number" id="salaryYear" min="2020" max="2100" required>
                             </div>
                             <div class="form-group">
                                 <label>Mesec</label>
-                                <select id="monthlyMonth" required>
+                                <select id="salaryMonth" required>
                                     <option value="1">Januar</option>
                                     <option value="2">Februar</option>
                                     <option value="3">Mart</option>
@@ -107,30 +116,21 @@
                         </div>
                         
                         <div class="form-group">
-                            <label>Opis</label>
-                            <input type="text" id="monthlyDescription" required>
+                            <label>Opis (npr. "Plata Januar", "Bonus", "Projekat")</label>
+                            <input type="text" id="salaryDescription" placeholder="Plata" required>
                         </div>
                         
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Tip</label>
-                                <select id="monthlyType" required>
-                                    <option value="income">Prihod</option>
-                                    <option value="expense">Trošak</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Iznos (RSD)</label>
-                                <input type="number" id="monthlyAmount" step="0.01" required>
-                            </div>
+                        <div class="form-group">
+                            <label>Iznos (RSD)</label>
+                            <input type="number" id="salaryAmount" step="0.01" required>
                         </div>
                         
-                        <button type="submit" class="btn">Dodaj Unos</button>
+                        <button type="submit" class="btn">💰 Dodaj Zaradu</button>
                     </form>
                 </div>
 
                 <div class="glass-card">
-                    <h3>Svi Unosi</h3>
+                    <h3>Svi Unosi Zarade</h3>
                     <div class="filter-controls">
                         <select id="filterYear">
                             <option value="">Sve godine</option>
@@ -151,7 +151,7 @@
                             <option value="12">Decembar</option>
                         </select>
                     </div>
-                    <div id="monthlyEntriesList" class="entries-list"></div>
+                    <div id="salaryEntriesList" class="entries-list"></div>
                 </div>
             </section>
 
