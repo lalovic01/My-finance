@@ -21,9 +21,9 @@
 // ========================================
 
 const AppState = {
-    exchangeRate: 117, // Fallback kurs
+    exchangeRate: 117,
     lastRateUpdate: null,
-    monthlyEntries: [],
+    salaryEntries: [], // Promenjena iz monthlyEntries u salaryEntries
     cardTransactions: [],
     cashHistory: [],
     termDeposits: [],
@@ -76,7 +76,12 @@ const StorageService = {
             const saved = localStorage.getItem(this.STORAGE_KEY);
             if (saved) {
                 const data = JSON.parse(saved);
-                AppState.monthlyEntries = data.monthlyEntries || [];
+                // Backward compatibility - migriraj stare monthlyEntries u salaryEntries
+                AppState.salaryEntries = data.salaryEntries || data.monthlyEntries || [];
+                // Filtriraj samo prihode ako postoje stari podaci
+                if (data.monthlyEntries && !data.salaryEntries) {
+                    AppState.salaryEntries = data.monthlyEntries.filter(e => e.type === 'income');
+                }
                 AppState.cardTransactions = data.cardTransactions || [];
                 AppState.cashHistory = data.cashHistory || [];
                 AppState.termDeposits = data.termDeposits || [];
@@ -95,7 +100,7 @@ const StorageService = {
     saveState() {
         try {
             const data = {
-                monthlyEntries: AppState.monthlyEntries,
+                salaryEntries: AppState.salaryEntries,
                 cardTransactions: AppState.cardTransactions,
                 cashHistory: AppState.cashHistory,
                 termDeposits: AppState.termDeposits,
@@ -114,7 +119,7 @@ const StorageService = {
      */
     exportData() {
         const data = {
-            monthlyEntries: AppState.monthlyEntries,
+            salaryEntries: AppState.salaryEntries,
             cardTransactions: AppState.cardTransactions,
             cashHistory: AppState.cashHistory,
             termDeposits: AppState.termDeposits,
@@ -139,7 +144,7 @@ const StorageService = {
         reader.onload = (e) => {
             try {
                 const data = JSON.parse(e.target.result);
-                AppState.monthlyEntries = data.monthlyEntries || [];
+                AppState.salaryEntries = data.salaryEntries || data.monthlyEntries || [];
                 AppState.cardTransactions = data.cardTransactions || [];
                 AppState.cashHistory = data.cashHistory || [];
                 AppState.termDeposits = data.termDeposits || [];
@@ -161,28 +166,27 @@ const StorageService = {
 
 const FinanceModule = {
     /**
-     * Dodaje mesečni unos (prihod ili trošak)
+     * Dodaje unos zarade (samo prihod)
      */
-    addMonthlyEntry(year, month, description, type, amount) {
+    addSalaryEntry(year, month, description, amount) {
         const entry = {
             id: Date.now(),
             year: parseInt(year),
             month: parseInt(month),
             description,
-            type, // 'income' ili 'expense'
             amount: parseFloat(amount),
             date: new Date().toISOString()
         };
-        AppState.monthlyEntries.push(entry);
+        AppState.salaryEntries.push(entry);
         StorageService.saveState();
-        console.log('✅ Dodat mesečni unos:', entry);
+        console.log('✅ Dodata zarada:', entry);
     },
     
     /**
-     * Briše mesečni unos
+     * Briše unos zarade
      */
-    deleteMonthlyEntry(id) {
-        AppState.monthlyEntries = AppState.monthlyEntries.filter(e => e.id !== id);
+    deleteSalaryEntry(id) {
+        AppState.salaryEntries = AppState.salaryEntries.filter(e => e.id !== id);
         StorageService.saveState();
     },
     
@@ -267,13 +271,12 @@ const FinanceModule = {
 
 const Calculator = {
     /**
-     * Izračunava ukupan saldo mesečnih unosa
+     * Izračunava ukupnu zaradu
+     * NAPOMENA: Ovo se NE računa u ukupno bogatstvo, samo za statistiku!
      */
-    calculateMonthlyBalance() {
-        return AppState.monthlyEntries.reduce((total, entry) => {
-            return entry.type === 'income' 
-                ? total + entry.amount 
-                : total - entry.amount;
+    calculateTotalSalary() {
+        return AppState.salaryEntries.reduce((total, entry) => {
+            return total + entry.amount;
         }, 0);
     },
     
@@ -343,38 +346,30 @@ const Calculator = {
     
     /**
      * Izračunava ukupno bogatstvo
+     * VAŽNO: Mesečni unosi se NE uključuju, oni su samo za statistiku
      */
     calculateTotalWealth() {
-        const monthlyRSD = this.calculateMonthlyBalance();
+        // Mesečni unosi se NE računaju - samo kartica, gotovina i depoziti
         const cardRSD = this.calculateCardBalance();
         const cashEUR = this.calculateCashBalance();
         const cashRSD = this.convertEURtoRSD(cashEUR);
         const depositsRSD = this.calculateTotalDepositsValue();
         
-        return monthlyRSD + cardRSD + cashRSD + depositsRSD;
+        return cardRSD + cashRSD + depositsRSD;
     },
     
     /**
-     * Generiše godišnji pregled
+     * Generiše godišnji pregled zarade
      */
     generateYearlySummary() {
         const summary = {};
         
-        AppState.monthlyEntries.forEach(entry => {
+        AppState.salaryEntries.forEach(entry => {
             if (!summary[entry.year]) {
-                summary[entry.year] = { income: 0, expense: 0, balance: 0 };
+                summary[entry.year] = { total: 0, count: 0 };
             }
-            
-            if (entry.type === 'income') {
-                summary[entry.year].income += entry.amount;
-            } else {
-                summary[entry.year].expense += entry.amount;
-            }
-        });
-        
-        // Izračunaj balans za svaku godinu
-        Object.keys(summary).forEach(year => {
-            summary[year].balance = summary[year].income - summary[year].expense;
+            summary[entry.year].total += entry.amount;
+            summary[entry.year].count += 1;
         });
         
         return summary;
@@ -398,8 +393,8 @@ const UIController = {
         
         // Postavi trenutnu godinu i mesec u formu
         const now = new Date();
-        document.getElementById('monthlyYear').value = now.getFullYear();
-        document.getElementById('monthlyMonth').value = now.getMonth() + 1;
+        document.getElementById('salaryYear').value = now.getFullYear();
+        document.getElementById('salaryMonth').value = now.getMonth() + 1;
         document.getElementById('depositStartDate').value = now.toISOString().split('T')[0];
     },
     
@@ -412,7 +407,6 @@ const UIController = {
                 const section = btn.dataset.section;
                 this.showSection(section);
                 
-                // Update active state
                 document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
             });
@@ -429,9 +423,8 @@ const UIController = {
         document.getElementById(sectionId).classList.add('active');
         AppState.currentSection = sectionId;
         
-        // Refresh data for specific section
         if (sectionId === 'dashboard') this.refreshDashboard();
-        if (sectionId === 'monthly') this.refreshMonthlyEntries();
+        if (sectionId === 'salary') this.refreshSalaryEntries();
         if (sectionId === 'card') this.refreshCardTransactions();
         if (sectionId === 'cash') this.refreshCashHistory();
         if (sectionId === 'deposits') this.refreshDeposits();
@@ -441,28 +434,26 @@ const UIController = {
      * Postavlja event listenere za forme
      */
     setupForms() {
-        // Mesečni unosi
-        document.getElementById('monthlyForm').addEventListener('submit', (e) => {
+        // Zarada
+        document.getElementById('salaryForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const year = document.getElementById('monthlyYear').value;
-            const month = document.getElementById('monthlyMonth').value;
-            const description = document.getElementById('monthlyDescription').value;
-            const type = document.getElementById('monthlyType').value;
-            const amount = document.getElementById('monthlyAmount').value;
+            const year = document.getElementById('salaryYear').value;
+            const month = document.getElementById('salaryMonth').value;
+            const description = document.getElementById('salaryDescription').value;
+            const amount = document.getElementById('salaryAmount').value;
             
-            // Validacija
             if (parseFloat(amount) <= 0) {
                 alert('⚠️ Iznos mora biti veći od 0!');
                 return;
             }
             
-            FinanceModule.addMonthlyEntry(year, month, description, type, amount);
+            FinanceModule.addSalaryEntry(year, month, description, amount);
             e.target.reset();
             const now = new Date();
-            document.getElementById('monthlyYear').value = now.getFullYear();
-            document.getElementById('monthlyMonth').value = now.getMonth() + 1;
+            document.getElementById('salaryYear').value = now.getFullYear();
+            document.getElementById('salaryMonth').value = now.getMonth() + 1;
             this.refresh();
-            this.showNotification('✅ Unos uspešno dodat!', 'success');
+            this.showNotification('✅ Zarada uspešno dodata!', 'success');
         });
         
         // Kartica
@@ -526,8 +517,8 @@ const UIController = {
         });
         
         // Filteri
-        document.getElementById('filterYear').addEventListener('change', () => this.refreshMonthlyEntries());
-        document.getElementById('filterMonth').addEventListener('change', () => this.refreshMonthlyEntries());
+        document.getElementById('filterYear').addEventListener('change', () => this.refreshSalaryEntries());
+        document.getElementById('filterMonth').addEventListener('change', () => this.refreshSalaryEntries());
     },
     
     /**
@@ -593,7 +584,7 @@ const UIController = {
      */
     refresh() {
         this.refreshDashboard();
-        this.refreshMonthlyEntries();
+        this.refreshSalaryEntries();
         this.refreshCardTransactions();
         this.refreshCashHistory();
         this.refreshDeposits();
@@ -604,14 +595,14 @@ const UIController = {
      * Osvežava dashboard
      */
     refreshDashboard() {
-        const monthlyRSD = Calculator.calculateMonthlyBalance();
+        const totalSalary = Calculator.calculateTotalSalary();
         const cardRSD = Calculator.calculateCardBalance();
         const cashEUR = Calculator.calculateCashBalance();
         const cashRSD = Calculator.convertEURtoRSD(cashEUR);
         const depositsRSD = Calculator.calculateTotalDepositsValue();
         const totalWealth = Calculator.calculateTotalWealth();
         
-        document.getElementById('totalMonthlyRSD').textContent = this.formatCurrency(monthlyRSD, 'RSD');
+        document.getElementById('totalSalaryRSD').textContent = this.formatCurrency(totalSalary, 'RSD');
         document.getElementById('totalCardRSD').textContent = this.formatCurrency(cardRSD, 'RSD');
         document.getElementById('totalCashEUR').textContent = this.formatCurrency(cashEUR, 'EUR');
         document.getElementById('totalCashRSD').textContent = this.formatCurrency(cashRSD, 'RSD');
@@ -637,19 +628,19 @@ const UIController = {
         
         container.innerHTML = Object.keys(summary).sort().reverse().map(year => `
             <div class="year-summary">
-                <h4>${year}</h4>
+                <h4>Godina ${year}</h4>
                 <div class="year-stats">
                     <div class="year-stat">
-                        <div class="year-stat-label">Prihodi</div>
-                        <div class="year-stat-value" style="color: #10b981;">${this.formatCurrency(summary[year].income, 'RSD')}</div>
+                        <div class="year-stat-label">Ukupna Zarada</div>
+                        <div class="year-stat-value" style="color: #10b981;">${this.formatCurrency(summary[year].total, 'RSD')}</div>
                     </div>
                     <div class="year-stat">
-                        <div class="year-stat-label">Troškovi</div>
-                        <div class="year-stat-value" style="color: #ef4444;">${this.formatCurrency(summary[year].expense, 'RSD')}</div>
+                        <div class="year-stat-label">Broj Unosa</div>
+                        <div class="year-stat-value">${summary[year].count}</div>
                     </div>
                     <div class="year-stat">
-                        <div class="year-stat-label">Balans</div>
-                        <div class="year-stat-value">${this.formatCurrency(summary[year].balance, 'RSD')}</div>
+                        <div class="year-stat-label">Prosečno</div>
+                        <div class="year-stat-value">${this.formatCurrency(summary[year].total / summary[year].count, 'RSD')}</div>
                     </div>
                 </div>
             </div>
@@ -659,11 +650,11 @@ const UIController = {
     /**
      * Osvežava mesečne unose
      */
-    refreshMonthlyEntries() {
+    refreshSalaryEntries() {
         const filterYear = document.getElementById('filterYear').value;
         const filterMonth = document.getElementById('filterMonth').value;
         
-        let entries = [...AppState.monthlyEntries];
+        let entries = [...AppState.salaryEntries];
         
         if (filterYear) {
             entries = entries.filter(e => e.year == filterYear);
@@ -674,7 +665,7 @@ const UIController = {
         
         entries.sort((a, b) => b.id - a.id);
         
-        const container = document.getElementById('monthlyEntriesList');
+        const container = document.getElementById('salaryEntriesList');
         
         if (entries.length === 0) {
             container.innerHTML = '<p style="color: white;">Nema unosa.</p>';
@@ -687,9 +678,9 @@ const UIController = {
                     <div class="entry-description">${entry.description}</div>
                     <div class="entry-meta">${entry.year} - ${this.getMonthName(entry.month)}</div>
                 </div>
-                <div class="entry-amount ${entry.type}">${this.formatCurrency(entry.amount, 'RSD')}</div>
+                <div class="entry-amount income">${this.formatCurrency(entry.amount, 'RSD')}</div>
                 <div class="entry-actions">
-                    <button class="delete-btn" onclick="UIController.deleteMonthlyEntry(${entry.id})">🗑️</button>
+                    <button class="delete-btn" onclick="UIController.deleteSalaryEntry(${entry.id})">🗑️</button>
                 </div>
             </div>
         `).join('');
@@ -814,7 +805,7 @@ const UIController = {
      * Popunjava filter za godine
      */
     populateYearFilter() {
-        const years = [...new Set(AppState.monthlyEntries.map(e => e.year))].sort().reverse();
+        const years = [...new Set(AppState.salaryEntries.map(e => e.year))].sort().reverse();
         const select = document.getElementById('filterYear');
         const currentValue = select.value;
         
@@ -866,9 +857,9 @@ const UIController = {
     },
     
     // Delete funkcije koje se pozivaju iz HTML-a
-    deleteMonthlyEntry(id) {
+    deleteSalaryEntry(id) {
         if (confirm('Da li ste sigurni da želite da obrišete ovaj unos?')) {
-            FinanceModule.deleteMonthlyEntry(id);
+            FinanceModule.deleteSalaryEntry(id);
             this.refresh();
         }
     },
@@ -901,9 +892,9 @@ const UIController = {
 
 function loadDemoData() {
     // Mesečni unosi
-    FinanceModule.addMonthlyEntry(2024, 1, 'Plata Januar', 'income', 80000);
-    FinanceModule.addMonthlyEntry(2024, 1, 'Kirija', 'expense', 25000);
-    FinanceModule.addMonthlyEntry(2024, 2, 'Plata Februar', 'income', 85000);
+    FinanceModule.addSalaryEntry(2024, 1, 'Plata Januar', 80000);
+    FinanceModule.addSalaryEntry(2024, 1, 'Kirija', -25000);
+    FinanceModule.addSalaryEntry(2024, 2, 'Plata Februar', 85000);
     
     // Kartica
     FinanceModule.addCardTransaction('Plata Februar', 'income', 85000);
@@ -937,7 +928,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     UIController.init();
     
     // Opciono: Učitaj demo podatke ako nema podataka
-    // if (AppState.monthlyEntries.length === 0) {
+    // if (AppState.salaryEntries.length === 0) {
     //     loadDemoData();
     //     UIController.refresh();
     // }
