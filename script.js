@@ -23,9 +23,10 @@
 const AppState = {
     exchangeRate: 117,
     lastRateUpdate: null,
-    salaryEntries: [], // Promenjena iz monthlyEntries u salaryEntries
+    salaryEntries: [],
     cardTransactions: [],
-    cashHistory: [],
+    cashHistoryEUR: [], // Promenjena iz cashHistory u cashHistoryEUR
+    cashHistoryRSD: [], // Nova - istorija RSD gotovine
     termDeposits: [],
     currentSection: 'dashboard'
 };
@@ -76,14 +77,15 @@ const StorageService = {
             const saved = localStorage.getItem(this.STORAGE_KEY);
             if (saved) {
                 const data = JSON.parse(saved);
-                // Backward compatibility - migriraj stare monthlyEntries u salaryEntries
+                // Backward compatibility
                 AppState.salaryEntries = data.salaryEntries || data.monthlyEntries || [];
-                // Filtriraj samo prihode ako postoje stari podaci
                 if (data.monthlyEntries && !data.salaryEntries) {
                     AppState.salaryEntries = data.monthlyEntries.filter(e => e.type === 'income');
                 }
                 AppState.cardTransactions = data.cardTransactions || [];
-                AppState.cashHistory = data.cashHistory || [];
+                // Migracija stare cashHistory u EUR
+                AppState.cashHistoryEUR = data.cashHistoryEUR || data.cashHistory || [];
+                AppState.cashHistoryRSD = data.cashHistoryRSD || [];
                 AppState.termDeposits = data.termDeposits || [];
                 AppState.exchangeRate = data.exchangeRate || 117;
                 AppState.lastRateUpdate = data.lastRateUpdate || null;
@@ -102,7 +104,8 @@ const StorageService = {
             const data = {
                 salaryEntries: AppState.salaryEntries,
                 cardTransactions: AppState.cardTransactions,
-                cashHistory: AppState.cashHistory,
+                cashHistoryEUR: AppState.cashHistoryEUR,
+                cashHistoryRSD: AppState.cashHistoryRSD,
                 termDeposits: AppState.termDeposits,
                 exchangeRate: AppState.exchangeRate,
                 lastRateUpdate: AppState.lastRateUpdate
@@ -121,7 +124,8 @@ const StorageService = {
         const data = {
             salaryEntries: AppState.salaryEntries,
             cardTransactions: AppState.cardTransactions,
-            cashHistory: AppState.cashHistory,
+            cashHistoryEUR: AppState.cashHistoryEUR,
+            cashHistoryRSD: AppState.cashHistoryRSD,
             termDeposits: AppState.termDeposits,
             exportDate: new Date().toISOString()
         };
@@ -146,7 +150,8 @@ const StorageService = {
                 const data = JSON.parse(e.target.result);
                 AppState.salaryEntries = data.salaryEntries || data.monthlyEntries || [];
                 AppState.cardTransactions = data.cardTransactions || [];
-                AppState.cashHistory = data.cashHistory || [];
+                AppState.cashHistoryEUR = data.cashHistoryEUR || data.cashHistory || [];
+                AppState.cashHistoryRSD = data.cashHistoryRSD || [];
                 AppState.termDeposits = data.termDeposits || [];
                 this.saveState();
                 UIController.refresh();
@@ -215,9 +220,9 @@ const FinanceModule = {
     },
     
     /**
-     * Dodaje promenu u kućnoj gotovini (EUR)
+     * Dodaje promenu u kućnoj gotovini EUR
      */
-    addCashChange(description, type, amount) {
+    addCashChangeEUR(description, type, amount) {
         const change = {
             id: Date.now(),
             description,
@@ -225,16 +230,40 @@ const FinanceModule = {
             amount: parseFloat(amount),
             date: new Date().toISOString()
         };
-        AppState.cashHistory.push(change);
+        AppState.cashHistoryEUR.push(change);
         StorageService.saveState();
-        console.log('✅ Dodata promena u gotovini:', change);
+        console.log('✅ Dodata promena u EUR gotovini:', change);
     },
     
     /**
-     * Briše promenu u gotovini
+     * Briše promenu u EUR gotovini
      */
-    deleteCashChange(id) {
-        AppState.cashHistory = AppState.cashHistory.filter(c => c.id !== id);
+    deleteCashChangeEUR(id) {
+        AppState.cashHistoryEUR = AppState.cashHistoryEUR.filter(c => c.id !== id);
+        StorageService.saveState();
+    },
+    
+    /**
+     * Dodaje promenu u kućnoj gotovini RSD
+     */
+    addCashChangeRSD(description, type, amount) {
+        const change = {
+            id: Date.now(),
+            description,
+            type, // 'add' ili 'subtract'
+            amount: parseFloat(amount),
+            date: new Date().toISOString()
+        };
+        AppState.cashHistoryRSD.push(change);
+        StorageService.saveState();
+        console.log('✅ Dodata promena u RSD gotovini:', change);
+    },
+    
+    /**
+     * Briše promenu u RSD gotovini
+     */
+    deleteCashChangeRSD(id) {
+        AppState.cashHistoryRSD = AppState.cashHistoryRSD.filter(c => c.id !== id);
         StorageService.saveState();
     },
     
@@ -294,8 +323,19 @@ const Calculator = {
     /**
      * Izračunava ukupnu kućnu gotovinu u EUR
      */
-    calculateCashBalance() {
-        return AppState.cashHistory.reduce((total, change) => {
+    calculateCashBalanceEUR() {
+        return AppState.cashHistoryEUR.reduce((total, change) => {
+            return change.type === 'add'
+                ? total + change.amount
+                : total - change.amount;
+        }, 0);
+    },
+    
+    /**
+     * Izračunava ukupnu kućnu gotovinu u RSD
+     */
+    calculateCashBalanceRSD() {
+        return AppState.cashHistoryRSD.reduce((total, change) => {
             return change.type === 'add'
                 ? total + change.amount
                 : total - change.amount;
@@ -349,13 +389,13 @@ const Calculator = {
      * VAŽNO: Mesečni unosi se NE uključuju, oni su samo za statistiku
      */
     calculateTotalWealth() {
-        // Mesečni unosi se NE računaju - samo kartica, gotovina i depoziti
         const cardRSD = this.calculateCardBalance();
-        const cashEUR = this.calculateCashBalance();
-        const cashRSD = this.convertEURtoRSD(cashEUR);
+        const cashEUR = this.calculateCashBalanceEUR();
+        const cashRSD = this.calculateCashBalanceRSD();
+        const cashEURtoRSD = this.convertEURtoRSD(cashEUR);
         const depositsRSD = this.calculateTotalDepositsValue();
         
-        return cardRSD + cashRSD + depositsRSD;
+        return cardRSD + cashEURtoRSD + cashRSD + depositsRSD;
     },
     
     /**
@@ -479,23 +519,40 @@ const UIController = {
             this.showNotification('✅ Transakcija uspešno dodata!', 'success');
         });
         
-        // Gotovina
-        document.getElementById('cashForm').addEventListener('submit', (e) => {
+        // Gotovina EUR
+        document.getElementById('cashFormEUR').addEventListener('submit', (e) => {
             e.preventDefault();
-            const description = document.getElementById('cashDescription').value;
-            const type = document.getElementById('cashType').value;
-            const amount = document.getElementById('cashAmount').value;
+            const description = document.getElementById('cashDescriptionEUR').value;
+            const type = document.getElementById('cashTypeEUR').value;
+            const amount = document.getElementById('cashAmountEUR').value;
             
-            // Validacija
             if (parseFloat(amount) <= 0) {
                 alert('⚠️ Iznos mora biti veći od 0!');
                 return;
             }
             
-            FinanceModule.addCashChange(description, type, amount);
+            FinanceModule.addCashChangeEUR(description, type, amount);
             e.target.reset();
             this.refresh();
-            this.showNotification('✅ Promena uspešno sačuvana!', 'success');
+            this.showNotification('✅ Promena EUR gotovine uspešno sačuvana!', 'success');
+        });
+        
+        // Gotovina RSD
+        document.getElementById('cashFormRSD').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const description = document.getElementById('cashDescriptionRSD').value;
+            const type = document.getElementById('cashTypeRSD').value;
+            const amount = document.getElementById('cashAmountRSD').value;
+            
+            if (parseFloat(amount) <= 0) {
+                alert('⚠️ Iznos mora biti veći od 0!');
+                return;
+            }
+            
+            FinanceModule.addCashChangeRSD(description, type, amount);
+            e.target.reset();
+            this.refresh();
+            this.showNotification('✅ Promena RSD gotovine uspešno sačuvana!', 'success');
         });
         
         // Depoziti
@@ -606,8 +663,9 @@ const UIController = {
     refreshDashboard() {
         const totalSalary = Calculator.calculateTotalSalary();
         const cardRSD = Calculator.calculateCardBalance();
-        const cashEUR = Calculator.calculateCashBalance();
-        const cashRSD = Calculator.convertEURtoRSD(cashEUR);
+        const cashEUR = Calculator.calculateCashBalanceEUR();
+        const cashRSD = Calculator.calculateCashBalanceRSD();
+        const cashEURtoRSD = Calculator.convertEURtoRSD(cashEUR);
         const depositsRSD = Calculator.calculateTotalDepositsValue();
         const totalWealth = Calculator.calculateTotalWealth();
         
@@ -615,6 +673,7 @@ const UIController = {
         document.getElementById('totalCardRSD').textContent = this.formatCurrency(cardRSD, 'RSD');
         document.getElementById('totalCashEUR').textContent = this.formatCurrency(cashEUR, 'EUR');
         document.getElementById('totalCashRSD').textContent = this.formatCurrency(cashRSD, 'RSD');
+        document.getElementById('totalCashEURtoRSD').textContent = this.formatCurrency(cashEURtoRSD, 'RSD');
         document.getElementById('totalDepositsRSD').textContent = this.formatCurrency(depositsRSD, 'RSD');
         document.getElementById('activeDepositsCount').textContent = `${AppState.termDeposits.length} aktivnih`;
         document.getElementById('totalWealth').textContent = this.formatCurrency(totalWealth, 'RSD');
@@ -725,35 +784,58 @@ const UIController = {
     },
     
     /**
-     * Osvežava istoriju gotovine
+     * Osvežava istoriju gotovine EUR i RSD
      */
     refreshCashHistory() {
-        const balanceEUR = Calculator.calculateCashBalance();
-        const balanceRSD = Calculator.convertEURtoRSD(balanceEUR);
+        const balanceEUR = Calculator.calculateCashBalanceEUR();
+        const balanceRSD = Calculator.calculateCashBalanceRSD();
+        const balanceEURtoRSD = Calculator.convertEURtoRSD(balanceEUR);
         
-        document.getElementById('cashBalance').textContent = this.formatCurrency(balanceEUR, 'EUR');
+        document.getElementById('cashBalanceEUR').textContent = this.formatCurrency(balanceEUR, 'EUR');
+        document.getElementById('cashBalanceEURtoRSD').textContent = this.formatCurrency(balanceEURtoRSD, 'RSD');
         document.getElementById('cashBalanceRSD').textContent = this.formatCurrency(balanceRSD, 'RSD');
         
-        const history = [...AppState.cashHistory].sort((a, b) => b.id - a.id);
-        const container = document.getElementById('cashHistoryList');
+        // EUR istorija
+        const historyEUR = [...AppState.cashHistoryEUR].sort((a, b) => b.id - a.id);
+        const containerEUR = document.getElementById('cashHistoryListEUR');
         
-        if (history.length === 0) {
-            container.innerHTML = '<p style="color: white;">Nema istorije.</p>';
-            return;
+        if (historyEUR.length === 0) {
+            containerEUR.innerHTML = '<p style="color: white;">Nema istorije EUR gotovine.</p>';
+        } else {
+            containerEUR.innerHTML = historyEUR.map(h => `
+                <div class="entry-item">
+                    <div class="entry-info">
+                        <div class="entry-description">${h.description}</div>
+                        <div class="entry-meta">${new Date(h.date).toLocaleString('sr-RS')}</div>
+                    </div>
+                    <div class="entry-amount ${h.type === 'add' ? 'income' : 'expense'}">${this.formatCurrency(h.amount, 'EUR')}</div>
+                    <div class="entry-actions">
+                        <button class="delete-btn" onclick="UIController.deleteCashChangeEUR(${h.id})">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
         }
         
-        container.innerHTML = history.map(h => `
-            <div class="entry-item">
-                <div class="entry-info">
-                    <div class="entry-description">${h.description}</div>
-                    <div class="entry-meta">${new Date(h.date).toLocaleString('sr-RS')}</div>
+        // RSD istorija
+        const historyRSD = [...AppState.cashHistoryRSD].sort((a, b) => b.id - a.id);
+        const containerRSD = document.getElementById('cashHistoryListRSD');
+        
+        if (historyRSD.length === 0) {
+            containerRSD.innerHTML = '<p style="color: white;">Nema istorije RSD gotovine.</p>';
+        } else {
+            containerRSD.innerHTML = historyRSD.map(h => `
+                <div class="entry-item">
+                    <div class="entry-info">
+                        <div class="entry-description">${h.description}</div>
+                        <div class="entry-meta">${new Date(h.date).toLocaleString('sr-RS')}</div>
+                    </div>
+                    <div class="entry-amount ${h.type === 'add' ? 'income' : 'expense'}">${this.formatCurrency(h.amount, 'RSD')}</div>
+                    <div class="entry-actions">
+                        <button class="delete-btn" onclick="UIController.deleteCashChangeRSD(${h.id})">🗑️</button>
+                    </div>
                 </div>
-                <div class="entry-amount ${h.type === 'add' ? 'income' : 'expense'}">${this.formatCurrency(h.amount, 'EUR')}</div>
-                <div class="entry-actions">
-                    <button class="delete-btn" onclick="UIController.deleteCashChange(${h.id})">🗑️</button>
-                </div>
-            </div>
-        `).join('');
+            `).join('');
+        }
     },
     
     /**
@@ -880,9 +962,16 @@ const UIController = {
         }
     },
     
-    deleteCashChange(id) {
+    deleteCashChangeEUR(id) {
         if (confirm('Da li ste sigurni da želite da obrišete ovu promenu?')) {
-            FinanceModule.deleteCashChange(id);
+            FinanceModule.deleteCashChangeEUR(id);
+            this.refresh();
+        }
+    },
+    
+    deleteCashChangeRSD(id) {
+        if (confirm('Da li ste sigurni da želite da obrišete ovu promenu?')) {
+            FinanceModule.deleteCashChangeRSD(id);
             this.refresh();
         }
     },
@@ -973,11 +1062,11 @@ const ChartModule = {
         if (!ctx) return;
         
         const cardBalance = Calculator.calculateCardBalance();
-        const cashEUR = Calculator.calculateCashBalance();
-        const cashRSD = Calculator.convertEURtoRSD(cashEUR);
+        const cashEUR = Calculator.calculateCashBalanceEUR();
+        const cashRSD = Calculator.calculateCashBalanceRSD();
+        const cashEURtoRSD = Calculator.convertEURtoRSD(cashEUR);
         const depositsRSD = Calculator.calculateTotalDepositsValue();
         
-        // Uništi postojeći chart ako postoji
         if (this.charts.wealthPie) {
             this.charts.wealthPie.destroy();
         }
@@ -985,17 +1074,19 @@ const ChartModule = {
         this.charts.wealthPie = new Chart(ctx, {
             type: 'pie',
             data: {
-                labels: ['Kartica', 'Gotovina (EUR)', 'Depoziti'],
+                labels: ['Kartica', 'Gotovina EUR', 'Gotovina RSD', 'Depoziti'],
                 datasets: [{
-                    data: [cardBalance, cashRSD, depositsRSD],
+                    data: [cardBalance, cashEURtoRSD, cashRSD, depositsRSD],
                     backgroundColor: [
                         'rgba(99, 102, 241, 0.8)',
                         'rgba(16, 185, 129, 0.8)',
+                        'rgba(245, 158, 11, 0.8)',
                         'rgba(139, 92, 246, 0.8)'
                     ],
                     borderColor: [
                         'rgba(99, 102, 241, 1)',
                         'rgba(16, 185, 129, 1)',
+                        'rgba(245, 158, 11, 1)',
                         'rgba(139, 92, 246, 1)'
                     ],
                     borderWidth: 2
