@@ -54,9 +54,15 @@
                     </div>
                     
                     <div class="glass-card">
-                        <h3>💶 Kućna Gotovina</h3>
+                        <h3>💶 Kućna Gotovina EUR</h3>
                         <div class="amount" id="totalCashEUR">0 EUR</div>
-                        <div class="amount-small" id="totalCashRSD">0 RSD</div>
+                        <div class="amount-small" id="totalCashEURtoRSD">0 RSD</div>
+                    </div>
+                    
+                    <div class="glass-card">
+                        <h3>💵 Kućna Gotovina RSD</h3>
+                        <div class="amount" id="totalCashRSD">0 RSD</div>
+                        <small>Dinarska gotovina</small>
                     </div>
                     
                     <div class="glass-card">
@@ -222,45 +228,91 @@
                 </div>
             </section>
 
-            <!-- Cash EUR Section -->
+            <!-- Cash EUR/RSD Section -->
             <section id="cash" class="section">
-                <h2>💶 Kućna Gotovina (EUR)</h2>
+                <h2>💰 Kućna Gotovina (EUR & RSD)</h2>
                 
-                <div class="glass-card balance-display">
-                    <h3>Trenutno Stanje</h3>
-                    <div class="amount large" id="cashBalance">0 EUR</div>
-                    <div class="amount-small" id="cashBalanceRSD">0 RSD</div>
+                <div class="cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+                    <div class="glass-card balance-display">
+                        <h3>💶 Stanje EUR</h3>
+                        <div class="amount large" id="cashBalanceEUR">0 EUR</div>
+                        <div class="amount-small" id="cashBalanceEURtoRSD">0 RSD</div>
+                    </div>
+                    
+                    <div class="glass-card balance-display">
+                        <h3>💵 Stanje RSD</h3>
+                        <div class="amount large" id="cashBalanceRSD">0 RSD</div>
+                    </div>
                 </div>
 
-                <div class="glass-card">
-                    <h3>Nova Promena</h3>
-                    <form id="cashForm" class="form">
-                        <div class="form-group">
-                            <label>Opis</label>
-                            <input type="text" id="cashDescription" required>
-                        </div>
-                        
-                        <div class="form-row">
+                <div class="cards-grid" style="grid-template-columns: 1fr 1fr;">
+                    <!-- EUR Forma -->
+                    <div class="glass-card">
+                        <h3>💶 Promena EUR Gotovine</h3>
+                        <form id="cashFormEUR" class="form">
                             <div class="form-group">
-                                <label>Tip</label>
-                                <select id="cashType" required>
-                                    <option value="add">Dodavanje</option>
-                                    <option value="subtract">Oduzimanje</option>
-                                </select>
+                                <label>Opis</label>
+                                <input type="text" id="cashDescriptionEUR" required>
                             </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Tip</label>
+                                    <select id="cashTypeEUR" required>
+                                        <option value="add">Dodavanje</option>
+                                        <option value="subtract">Oduzimanje</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Iznos (EUR)</label>
+                                    <input type="number" id="cashAmountEUR" step="0.01" required>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn">💶 Sačuvaj EUR Promenu</button>
+                        </form>
+                    </div>
+
+                    <!-- RSD Forma -->
+                    <div class="glass-card">
+                        <h3>💵 Promena RSD Gotovine</h3>
+                        <form id="cashFormRSD" class="form">
                             <div class="form-group">
-                                <label>Iznos (EUR)</label>
-                                <input type="number" id="cashAmount" step="0.01" required>
+                                <label>Opis</label>
+                                <input type="text" id="cashDescriptionRSD" required>
                             </div>
-                        </div>
-                        
-                        <button type="submit" class="btn">Sačuvaj Promenu</button>
-                    </form>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Tip</label>
+                                    <select id="cashTypeRSD" required>
+                                        <option value="add">Dodavanje</option>
+                                        <option value="subtract">Oduzimanje</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Iznos (RSD)</label>
+                                    <input type="number" id="cashAmountRSD" step="0.01" required>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn">💵 Sačuvaj RSD Promenu</button>
+                        </form>
+                    </div>
                 </div>
 
-                <div class="glass-card">
-                    <h3>Istorija Promena</h3>
-                    <div id="cashHistoryList" class="entries-list"></div>
+                <div class="cards-grid" style="grid-template-columns: 1fr 1fr;">
+                    <!-- EUR Istorija -->
+                    <div class="glass-card">
+                        <h3>💶 Istorija EUR Gotovine</h3>
+                        <div id="cashHistoryListEUR" class="entries-list"></div>
+                    </div>
+
+                    <!-- RSD Istorija -->
+                    <div class="glass-card">
+                        <h3>💵 Istorija RSD Gotovine</h3>
+                        <div id="cashHistoryListRSD" class="entries-list"></div>
+                    </div>
                 </div>
             </section>
 
