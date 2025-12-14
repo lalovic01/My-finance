@@ -28,6 +28,7 @@ Moderna web aplikacija za praćenje ličnih finansija sa liquid glass dizajnom.
 - 📊 Mesečne prihode i troškove
 - 💳 Tekući račun/karticu
 - 💶 Kućnu gotovinu u EUR
+- 💵 Kućnu gotovinu u RSD
 - 🏦 Oročene depozite sa kalkulacijom kamata
 - 💎 Ukupno bogatstvo u realnom vremenu
 
@@ -53,10 +54,11 @@ Moderna web aplikacija za praćenje ličnih finansija sa liquid glass dizajnom.
 - Trenutno stanje računa
 - Kompletna istorija transakcija
 
-### 4️⃣ Kućna Gotovina (EUR)
-- Dodavanje i oduzimanje gotovine
-- Automatska konverzija u RSD
-- Istorija svih promena
+### 4️⃣ Kućna Gotovina (EUR & RSD)
+- **EUR gotovina** - Dodavanje i oduzimanje
+- **RSD gotovina** - Dodavanje i oduzimanje
+- Automatska konverzija EUR u RSD za statistiku
+- Odvojene istorije za obe valute
 - Real-time kurs valute
 
 ### 5️⃣ Oročeni Depoziti
