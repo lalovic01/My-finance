@@ -1,4 +1,10 @@
 /* ========================================
+   BLACK & GOLD ELEGANCE THEME
+   Colors: Black (#000000), Prussian Blue (#14213d), 
+           Orange (#fca311), Alabaster Grey (#e5e5e5), White (#ffffff)
+======================================== */
+
+/* ========================================
    RESET & BASE STYLES
 ======================================== */
 
@@ -9,25 +15,28 @@
 }
 
 :root {
-    --primary: #6366f1;
-    --primary-light: #818cf8;
-    --secondary: #8b5cf6;
+    /* Main Theme Colors */
+    --black: #000000;
+    --prussian-blue: #14213d;
+    --orange: #fca311;
+    --alabaster-grey: #e5e5e5;
+    --white: #ffffff;
+    
+    /* Functional Colors */
     --success: #10b981;
     --danger: #ef4444;
-    --warning: #f59e0b;
-    --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --glass-bg: rgba(255, 255, 255, 0.1);
-    --glass-border: rgba(255, 255, 255, 0.2);
-    --text-primary: #1f2937;
-    --text-secondary: #6b7280;
-    --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    
+    /* Glass & Shadows */
+    --glass-bg: rgba(20, 33, 61, 0.7);
+    --glass-border: rgba(252, 163, 17, 0.3);
+    --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+    --gold-shadow: 0 4px 20px rgba(252, 163, 17, 0.4);
 }
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: var(--bg-gradient);
-    background-attachment: fixed;
-    color: var(--text-primary);
+    background: var(--prussian-blue);
+    color: var(--alabaster-grey);
     min-height: 100vh;
     line-height: 1.6;
 }
@@ -51,12 +60,13 @@ body {
     padding: 24px;
     box-shadow: var(--shadow);
     margin-bottom: 20px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 .glass-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.45);
+    box-shadow: 0 12px 40px 0 rgba(252, 163, 17, 0.3);
+    border-color: var(--orange);
 }
 
 /* ========================================
@@ -64,13 +74,14 @@ body {
 ======================================== */
 
 .header {
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--black);
     backdrop-filter: blur(20px);
     padding: 20px 0;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 16px rgba(252, 163, 17, 0.2);
     position: sticky;
     top: 0;
     z-index: 100;
+    border-bottom: 2px solid var(--orange);
 }
 
 .header .container {
@@ -80,20 +91,22 @@ body {
 }
 
 .header h1 {
-    color: white;
+    color: var(--orange);
     font-size: 28px;
     font-weight: 700;
+    text-shadow: 0 2px 10px rgba(252, 163, 17, 0.5);
 }
 
 .exchange-rate {
     display: flex;
     align-items: center;
     gap: 10px;
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--prussian-blue);
     padding: 8px 16px;
     border-radius: 20px;
-    color: white;
+    color: var(--white);
     font-weight: 600;
+    border: 1px solid var(--orange);
 }
 
 .icon-btn {
@@ -102,6 +115,7 @@ body {
     cursor: pointer;
     font-size: 18px;
     transition: transform 0.3s ease;
+    filter: drop-shadow(0 0 5px var(--orange));
 }
 
 .icon-btn:hover {
@@ -113,13 +127,14 @@ body {
 ======================================== */
 
 .nav {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(20, 33, 61, 0.95);
     backdrop-filter: blur(10px);
     padding: 15px 0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     position: sticky;
-    top: 68px;
+    top: 72px;
     z-index: 99;
+    border-bottom: 1px solid var(--orange);
 }
 
 .nav .container {
@@ -134,9 +149,9 @@ body {
 }
 
 .nav-btn {
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--alabaster-grey);
+    color: var(--white);
     padding: 10px 20px;
     border-radius: 12px;
     cursor: pointer;
@@ -146,13 +161,16 @@ body {
 }
 
 .nav-btn:hover {
-    background: rgba(255, 255, 255, 0.25);
+    background: rgba(252, 163, 17, 0.2);
+    border-color: var(--orange);
     transform: translateY(-2px);
 }
 
 .nav-btn.active {
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    border-color: transparent;
+    background: var(--orange);
+    color: var(--black);
+    border-color: var(--orange);
+    box-shadow: var(--gold-shadow);
 }
 
 /* ========================================
@@ -179,14 +197,14 @@ body {
 }
 
 .section h2 {
-    color: white;
+    color: var(--orange);
     font-size: 32px;
     margin-bottom: 30px;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    text-shadow: 0 2px 10px rgba(252, 163, 17, 0.3);
 }
 
 .section h3 {
-    color: white;
+    color: var(--white);
     font-size: 20px;
     margin-bottom: 20px;
 }
@@ -202,24 +220,12 @@ body {
     margin-bottom: 30px;
 }
 
-.stat-card {
-    border: 2px dashed rgba(255, 193, 7, 0.5) !important;
-    background: rgba(255, 193, 7, 0.05) !important;
-}
-
-.stat-note {
-    display: block;
-    color: var(--warning);
-    font-weight: 600;
-    font-size: 12px;
-    margin-top: 8px;
-}
-
 .amount {
     font-size: 32px;
     font-weight: 700;
-    color: white;
+    color: var(--orange);
     margin: 10px 0;
+    text-shadow: 0 2px 10px rgba(252, 163, 17, 0.3);
 }
 
 .amount.large {
@@ -228,20 +234,21 @@ body {
 
 .amount-small {
     font-size: 18px;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--alabaster-grey);
 }
 
 .total-wealth {
     text-align: center;
     padding: 40px;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(139, 92, 246, 0.3));
+    background: var(--black);
+    border: 2px solid var(--orange);
 }
 
 .total-amount {
     font-size: 56px;
     font-weight: 800;
-    color: white;
-    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    color: var(--orange);
+    text-shadow: 0 4px 20px rgba(252, 163, 17, 0.5);
 }
 
 .balance-display {
@@ -272,7 +279,7 @@ body {
 }
 
 .form-group label {
-    color: white;
+    color: var(--white);
     font-weight: 600;
     font-size: 14px;
 }
@@ -280,10 +287,10 @@ body {
 .form-group input,
 .form-group select {
     padding: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid var(--orange);
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
+    background: rgba(0, 0, 0, 0.5);
+    color: var(--white);
     font-size: 16px;
     transition: all 0.3s ease;
 }
@@ -291,29 +298,13 @@ body {
 .form-group input:focus,
 .form-group select:focus {
     outline: none;
-    border-color: var(--primary-light);
-    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--orange);
+    background: rgba(0, 0, 0, 0.7);
+    box-shadow: 0 0 10px rgba(252, 163, 17, 0.3);
 }
 
 .form-group input::placeholder {
-    color: rgba(255, 255, 255, 0.5);
-}
-
-.help-text {
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.8);
-    margin-top: 12px;
-}
-
-.help-text.warning {
-    color: var(--warning);
-}
-
-.help-text small {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
-    display: block;
-    margin-top: 4px;
+    color: var(--alabaster-grey);
 }
 
 /* ========================================
@@ -324,18 +315,19 @@ body {
     padding: 12px 24px;
     border: none;
     border-radius: 8px;
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    color: white;
+    background: var(--orange);
+    color: var(--black);
     font-weight: 600;
     font-size: 16px;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    box-shadow: var(--gold-shadow);
 }
 
 .btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.6);
+    box-shadow: 0 6px 25px rgba(252, 163, 17, 0.6);
+    background: #ffb633;
 }
 
 .btn:active {
@@ -343,7 +335,12 @@ body {
 }
 
 .btn-danger {
-    background: linear-gradient(135deg, var(--danger), #dc2626);
+    background: var(--danger);
+    color: var(--white);
+}
+
+.btn-danger:hover {
+    background: #dc2626;
 }
 
 /* ========================================
@@ -359,8 +356,8 @@ body {
 }
 
 .entry-item {
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid var(--orange);
     border-radius: 8px;
     padding: 16px;
     display: flex;
@@ -370,29 +367,31 @@ body {
 }
 
 .entry-item:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(20, 33, 61, 0.8);
+    box-shadow: 0 4px 15px rgba(252, 163, 17, 0.2);
 }
 
 .entry-info {
     flex: 1;
-    color: white;
+    color: var(--white);
 }
 
 .entry-description {
     font-weight: 600;
     font-size: 16px;
     margin-bottom: 4px;
+    color: var(--white);
 }
 
 .entry-meta {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--alabaster-grey);
 }
 
 .entry-amount {
     font-size: 20px;
     font-weight: 700;
-    color: white;
+    color: var(--orange);
     margin: 0 20px;
 }
 
@@ -419,13 +418,13 @@ body {
 }
 
 .edit-btn {
-    background: rgba(99, 102, 241, 0.8);
-    color: white;
+    background: rgba(252, 163, 17, 0.8);
+    color: var(--black);
 }
 
 .delete-btn {
     background: rgba(239, 68, 68, 0.8);
-    color: white;
+    color: var(--white);
 }
 
 .entry-actions button:hover {
@@ -444,10 +443,10 @@ body {
 
 .filter-controls select {
     padding: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid var(--orange);
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
+    background: rgba(0, 0, 0, 0.5);
+    color: var(--white);
     font-size: 14px;
 }
 
@@ -462,14 +461,14 @@ body {
 }
 
 .year-summary {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.6);
     border-radius: 8px;
     padding: 16px;
-    border-left: 4px solid var(--primary);
+    border-left: 4px solid var(--orange);
 }
 
 .year-summary h4 {
-    color: white;
+    color: var(--orange);
     margin-bottom: 12px;
 }
 
@@ -485,13 +484,13 @@ body {
 
 .year-stat-label {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--alabaster-grey);
 }
 
 .year-stat-value {
     font-size: 18px;
     font-weight: 700;
-    color: white;
+    color: var(--white);
 }
 
 /* ========================================
@@ -499,8 +498,8 @@ body {
 ======================================== */
 
 .deposit-card {
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid var(--orange);
     border-radius: 12px;
     padding: 20px;
     margin-bottom: 16px;
@@ -516,7 +515,7 @@ body {
 .deposit-amount {
     font-size: 28px;
     font-weight: 700;
-    color: white;
+    color: var(--orange);
 }
 
 .deposit-status {
@@ -525,7 +524,7 @@ body {
     font-size: 12px;
     font-weight: 600;
     background: var(--success);
-    color: white;
+    color: var(--white);
 }
 
 .deposit-details {
@@ -536,25 +535,27 @@ body {
 }
 
 .deposit-detail {
-    color: white;
+    color: var(--white);
 }
 
 .deposit-detail-label {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--alabaster-grey);
 }
 
 .deposit-detail-value {
     font-size: 14px;
     font-weight: 600;
+    color: var(--white);
 }
 
 .deposit-maturity {
     background: rgba(16, 185, 129, 0.2);
     border-radius: 8px;
     padding: 12px;
-    color: white;
+    color: var(--white);
     margin-bottom: 16px;
+    border: 1px solid var(--success);
 }
 
 /* ========================================
@@ -563,19 +564,12 @@ body {
 
 .help-text {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--alabaster-grey);
     margin-top: 12px;
 }
 
 .help-text.warning {
-    color: var(--warning);
-}
-
-.help-text small {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
-    display: block;
-    margin-top: 4px;
+    color: var(--orange);
 }
 
 /* ========================================
@@ -583,12 +577,13 @@ body {
 ======================================== */
 
 .footer {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.95);
     backdrop-filter: blur(10px);
     padding: 20px 0;
     margin-top: 60px;
     text-align: center;
-    color: white;
+    color: var(--alabaster-grey);
+    border-top: 2px solid var(--orange);
 }
 
 /* ========================================
@@ -600,17 +595,17 @@ body {
 }
 
 .entries-list::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.3);
     border-radius: 4px;
 }
 
 .entries-list::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
+    background: var(--orange);
     border-radius: 4px;
 }
 
 .entries-list::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.5);
+    background: #ffb633;
 }
 
 /* ========================================
@@ -623,10 +618,10 @@ body {
     right: 20px;
     padding: 16px 24px;
     border-radius: 12px;
-    background: var(--glass-bg);
+    background: rgba(20, 33, 61, 0.95);
     backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
-    color: white;
+    border: 1px solid var(--orange);
+    color: var(--white);
     font-weight: 600;
     box-shadow: var(--shadow);
     transform: translateX(400px);
@@ -648,11 +643,11 @@ body {
 }
 
 .notification.warning {
-    border-left: 4px solid var(--warning);
+    border-left: 4px solid var(--orange);
 }
 
 .notification.info {
-    border-left: 4px solid var(--primary);
+    border-left: 4px solid var(--orange);
 }
 
 /* ========================================
@@ -660,64 +655,75 @@ body {
 ======================================== */
 
 .form-group select option {
-    background: #2d3748;
-    color: white;
-}
-
-/* ========================================
-   EMPTY STATE
-======================================== */
-
-.empty-state {
-    text-align: center;
-    padding: 40px;
-    color: rgba(255, 255, 255, 0.6);
-}
-
-.empty-state-icon {
-    font-size: 48px;
-    margin-bottom: 16px;
-}
-
-/* ========================================
-   EXCHANGE INFO
-======================================== */
-
-.exchange-info {
-    color: white;
-}
-
-.exchange-info p {
-    margin-bottom: 12px;
-}
-
-.exchange-info strong {
-    color: var(--success);
-    font-size: 20px;
+    background: var(--prussian-blue);
+    color: var(--white);
 }
 
 /* ========================================
    LOADING STATE
 ======================================== */
 
-.skeleton {
-    background: linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0.1) 25%,
-        rgba(255, 255, 255, 0.2) 50%,
-        rgba(255, 255, 255, 0.1) 75%
-    );
-    background-size: 200% 100%;
-    animation: skeleton-loading 1.5s ease-in-out infinite;
+.loading {
+    animation: pulse 1.5s ease-in-out infinite;
 }
 
-@keyframes skeleton-loading {
-    0% {
-        background-position: 200% 0;
-    }
-    100% {
-        background-position: -200% 0;
-    }
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* ========================================
+   INFO BANNER
+======================================== */
+
+.info-banner {
+    background: rgba(252, 163, 17, 0.1) !important;
+    border-left: 4px solid var(--orange);
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    border: 1px solid var(--orange);
+}
+
+.info-banner p {
+    color: var(--white);
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.info-banner strong {
+    color: var(--orange);
+}
+
+/* ========================================
+   CHARTS
+======================================== */
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.chart-container {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid var(--orange);
+}
+
+.chart-container-wide {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid var(--orange);
+    margin-top: 20px;
+}
+
+.chart-container canvas,
+.chart-container-wide canvas {
+    max-height: 300px;
 }
 
 /* ========================================
@@ -765,13 +771,7 @@ body {
     .total-amount {
         font-size: 40px;
     }
-}
-
-/* ========================================
-   ADDITIONAL RESPONSIVE
-======================================== */
-
-@media (max-width: 768px) {
+    
     .notification {
         right: 10px;
         left: 10px;
@@ -792,70 +792,4 @@ body {
         flex-direction: column;
         gap: 12px;
     }
-}
-
-/* ========================================
-   ANIMATIONS
-======================================== */
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-}
-
-.loading {
-    animation: pulse 1.5s ease-in-out infinite;
-}
-
-/* ========================================
-   INFO BANNER
-======================================== */
-
-.info-banner {
-    background: rgba(99, 102, 241, 0.15) !important;
-    border-left: 4px solid var(--primary);
-    padding: 16px 20px;
-    margin-bottom: 24px;
-}
-
-.info-banner p {
-    color: white;
-    margin: 0;
-    font-size: 14px;
-    line-height: 1.6;
-}
-
-.info-banner strong {
-    color: var(--primary-light);
-}
-
-/* ========================================
-   CHARTS
-======================================== */
-
-.charts-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 30px;
-    margin-top: 20px;
-}
-
-.chart-container {
-    background: rgba(255, 255, 255, 0.05);
-    padding: 20px;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.chart-container-wide {
-    background: rgba(255, 255, 255, 0.05);
-    padding: 20px;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    margin-top: 20px;
-}
-
-.chart-container canvas,
-.chart-container-wide canvas {
-    max-height: 300px;
 }
