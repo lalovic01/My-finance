@@ -38,55 +38,73 @@
             
             <!-- Dashboard Section -->
             <section id="dashboard" class="section active">
-                <h2>Pregled Ukupnog Bogatstva</h2>
+                <h2>📊 Dashboard</h2>
                 
-                <div class="cards-grid">
-                    <div class="glass-card stat-card">
-                        <h3>💼 Ukupna Zarada</h3>
-                        <div class="amount" id="totalSalaryRSD">0 RSD</div>
-                        <small class="stat-note">⚠️ Samo statistika (ne ulazi u ukupno)</small>
+                <!-- TRENUTNO STANJE BOGATSTVA -->
+                <div class="glass-card" style="background: rgba(252, 163, 17, 0.05); border: 2px solid var(--orange);">
+                    <h3 style="color: var(--orange); margin-bottom: 20px;">💎 TRENUTNO STANJE BOGATSTVA</h3>
+                    
+                    <div class="cards-grid">
+                        <div class="glass-card">
+                            <h3>💳 Kartica/Račun</h3>
+                            <div class="amount" id="totalCardRSD">0 RSD</div>
+                            <small style="color: var(--alabaster-grey);">Tekući račun u banci</small>
+                        </div>
+                        
+                        <div class="glass-card">
+                            <h3>💶 Gotovina EUR</h3>
+                            <div class="amount" id="totalCashEUR">0 EUR</div>
+                            <div class="amount-small" id="totalCashEURtoRSD">0 RSD</div>
+                        </div>
+                        
+                        <div class="glass-card">
+                            <h3>💵 Gotovina RSD</h3>
+                            <div class="amount" id="totalCashRSD">0 RSD</div>
+                            <small style="color: var(--alabaster-grey);">Dinarska gotovina</small>
+                        </div>
+                        
+                        <div class="glass-card">
+                            <h3>🏦 Oročeni Depoziti</h3>
+                            <div class="amount" id="totalDepositsRSD">0 RSD</div>
+                            <small id="activeDepositsCount" style="color: var(--alabaster-grey);">0 aktivnih</small>
+                        </div>
                     </div>
                     
-                    <div class="glass-card">
-                        <h3>💳 Stanje Kartice</h3>
-                        <div class="amount" id="totalCardRSD">0 RSD</div>
-                        <small>Tekući račun</small>
-                    </div>
-                    
-                    <div class="glass-card">
-                        <h3>💶 Kućna Gotovina EUR</h3>
-                        <div class="amount" id="totalCashEUR">0 EUR</div>
-                        <div class="amount-small" id="totalCashEURtoRSD">0 RSD</div>
-                    </div>
-                    
-                    <div class="glass-card">
-                        <h3>💵 Kućna Gotovina RSD</h3>
-                        <div class="amount" id="totalCashRSD">0 RSD</div>
-                        <small>Dinarska gotovina</small>
-                    </div>
-                    
-                    <div class="glass-card">
-                        <h3>🏦 Oročeni Depoziti</h3>
-                        <div class="amount" id="totalDepositsRSD">0 RSD</div>
-                        <small id="activeDepositsCount">0 aktivnih</small>
+                    <!-- UKUPNO -->
+                    <div class="glass-card total-wealth" style="margin-top: 20px;">
+                        <h2>💎 UKUPNO BOGATSTVO</h2>
+                        <div class="total-amount" id="totalWealth">0 RSD</div>
+                        <small style="opacity: 0.8; font-size: 14px; color: var(--alabaster-grey);">Kartica + Gotovina + Depoziti</small>
                     </div>
                 </div>
 
-                <div class="glass-card total-wealth">
-                    <h2>💎 UKUPNO BOGATSTVO</h2>
-                    <div class="total-amount" id="totalWealth">0 RSD</div>
-                    <small style="opacity: 0.8; font-size: 14px;">Kartica + Gotovina + Depoziti</small>
-                </div>
-
-                <div class="glass-card">
-                    <h3>📈 Godišnji Pregled Zarade (Samo Statistika)</h3>
-                    <p style="color: rgba(255, 255, 255, 0.7); font-size: 14px; margin-bottom: 16px;">
-                        ℹ️ Ovaj pregled prikazuje koliko ste zaradili kroz godine. Ne utiče na ukupno bogatstvo.
-                    </p>
+                <!-- STATISTIKA ZARADE (ODVOJENO) -->
+                <div class="glass-card" style="background: rgba(20, 33, 61, 0.5); border: 2px dashed rgba(229, 229, 229, 0.3);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3>📈 Statistika Zarade</h3>
+                        <span style="
+                            background: rgba(229, 229, 229, 0.2); 
+                            padding: 4px 12px; 
+                            border-radius: 12px; 
+                            font-size: 12px; 
+                            color: var(--alabaster-grey);
+                            font-weight: 600;
+                        ">
+                            ℹ️ Samo za pregled, ne ulazi u ukupno
+                        </span>
+                    </div>
+                    
+                    <div class="glass-card" style="text-align: center; background: rgba(0, 0, 0, 0.3);">
+                        <h4 style="color: var(--alabaster-grey); font-size: 14px; margin-bottom: 10px;">Ukupna Zarada Kroz Godine</h4>
+                        <div class="amount" id="totalSalaryRSD" style="color: var(--alabaster-grey);">0 RSD</div>
+                        <small style="color: rgba(229, 229, 229, 0.6);">Suma svih unešenih plata i bonusa</small>
+                    </div>
+                    
+                    <h4 style="color: var(--white); margin: 30px 0 16px 0;">📊 Godišnji Pregled</h4>
                     <div id="yearlyOverview"></div>
                 </div>
 
-                <!-- NOVI DEO: Grafikoni -->
+                <!-- GRAFIKONI -->
                 <div class="glass-card">
                     <h3>📊 Vizuelni Pregled</h3>
                     
