@@ -28,7 +28,8 @@ const AppState = {
     cashHistoryEUR: [], // Promenjena iz cashHistory u cashHistoryEUR
     cashHistoryRSD: [], // Nova - istorija RSD gotovine
     termDeposits: [],
-    currentSection: 'dashboard'
+    currentSection: 'dashboard',
+    lastSalaryEntry: null // Novi - čuva poslednji unos plate
 };
 
 // ========================================
@@ -89,6 +90,7 @@ const StorageService = {
                 AppState.termDeposits = data.termDeposits || [];
                 AppState.exchangeRate = data.exchangeRate || 117;
                 AppState.lastRateUpdate = data.lastRateUpdate || null;
+                AppState.lastSalaryEntry = data.lastSalaryEntry || null;
                 console.log('✅ Podaci učitani iz localStorage');
             }
         } catch (error) {
@@ -108,7 +110,8 @@ const StorageService = {
                 cashHistoryRSD: AppState.cashHistoryRSD,
                 termDeposits: AppState.termDeposits,
                 exchangeRate: AppState.exchangeRate,
-                lastRateUpdate: AppState.lastRateUpdate
+                lastRateUpdate: AppState.lastRateUpdate,
+                lastSalaryEntry: AppState.lastSalaryEntry
             };
             localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
             console.log('✅ Podaci sačuvani u localStorage');
@@ -183,6 +186,13 @@ const FinanceModule = {
             date: new Date().toISOString()
         };
         AppState.salaryEntries.push(entry);
+        
+        // Sačuvaj poslednji unos za brzo kopiranje
+        AppState.lastSalaryEntry = {
+            description,
+            amount: parseFloat(amount)
+        };
+        
         StorageService.saveState();
         console.log('✅ Dodata zarada:', entry);
     },
@@ -498,6 +508,17 @@ const UIController = {
             document.getElementById('salaryMonth').value = now.getMonth() + 1;
             this.refresh();
             this.showNotification('✅ Zarada uspešno dodata!', 'success');
+        });
+        
+        // Dugme za kopiranje prošlog unosa
+        document.getElementById('copyLastSalary').addEventListener('click', () => {
+            if (AppState.lastSalaryEntry) {
+                document.getElementById('salaryDescription').value = AppState.lastSalaryEntry.description;
+                document.getElementById('salaryAmount').value = AppState.lastSalaryEntry.amount;
+                this.showNotification('✅ Podaci kopirani iz prošlog unosa!', 'info');
+            } else {
+                alert('⚠️ Nema prethodnog unosa za kopiranje!');
+            }
         });
         
         // Kartica
