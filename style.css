@@ -299,6 +299,23 @@ body {
     color: rgba(255, 255, 255, 0.5);
 }
 
+.help-text {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+    margin-top: 12px;
+}
+
+.help-text.warning {
+    color: var(--warning);
+}
+
+.help-text small {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    display: block;
+    margin-top: 4px;
+}
+
 /* ========================================
    BUTTONS
 ======================================== */
@@ -552,6 +569,13 @@ body {
 
 .help-text.warning {
     color: var(--warning);
+}
+
+.help-text small {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    display: block;
+    margin-top: 4px;
 }
 
 /* ========================================
@@ -835,5 +859,3 @@ body {
 .chart-container-wide canvas {
     max-height: 300px;
 }
-
-/* ...existing code... */
