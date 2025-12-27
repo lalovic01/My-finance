@@ -38,18 +38,36 @@ const AppState = {
 
 const APIService = {
     /**
-     * Pribavlja trenutni EUR/RSD kurs sa javnog API-ja
+     * Pribavlja trenutni EUR/RSD kurs preko FastForex API-ja
+     * Konvertuje USD → EUR → RSD
      * Fallback na 117 RSD ako API ne radi
      */
     async fetchExchangeRate() {
         try {
-            const response = await fetch('https://api.exchangerate.host/latest?base=EUR&symbols=RSD');
-            const data = await response.json();
+            // Pribavi USD → EUR
+            const responseUSDtoEUR = await fetch('https://api.fastforex.io/fetch-one?from=USD&to=EUR', {
+                headers: {
+                    'X-API-Key': '7f762ce40a-3a276c7aa7-t7xz3g'
+                }
+            });
+            const dataUSDtoEUR = await responseUSDtoEUR.json();
             
-            if (data.rates && data.rates.RSD) {
-                AppState.exchangeRate = data.rates.RSD;
+            // Pribavi USD → RSD
+            const responseUSDtoRSD = await fetch('https://api.fastforex.io/fetch-one?from=USD&to=RSD', {
+                headers: {
+                    'X-API-Key': '7f762ce40a-3a276c7aa7-t7xz3g'
+                }
+            });
+            const dataUSDtoRSD = await responseUSDtoRSD.json();
+            
+            if (dataUSDtoEUR.result && dataUSDtoRSD.result) {
+                const usdToEur = dataUSDtoEUR.result.EUR;
+                const usdToRsd = dataUSDtoRSD.result.RSD;
+                
+                // Izračunaj EUR → RSD: (USD → RSD) / (USD → EUR)
+                AppState.exchangeRate = usdToRsd / usdToEur;
                 AppState.lastRateUpdate = new Date().toISOString();
-                console.log('✅ Kurs uspešno preuzet:', AppState.exchangeRate);
+                console.log('✅ Kurs uspešno preuzet:', AppState.exchangeRate.toFixed(2));
                 return AppState.exchangeRate;
             } else {
                 throw new Error('Invalid API response');
@@ -187,7 +205,7 @@ const FinanceModule = {
         };
         AppState.salaryEntries.push(entry);
         
-        // Sačuvaj poslednji unos za brzo kopiranje
+        // Sačuvaj posledji unos za brzo kopiranje
         AppState.lastSalaryEntry = {
             description,
             amount: parseFloat(amount)
