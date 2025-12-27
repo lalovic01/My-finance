@@ -454,6 +454,8 @@ const UIController = {
      */
     init() {
         this.setupNavigation();
+        this.setupMobileMenu();
+        this.setupScrollEffects();
         this.setupForms();
         this.setupSettings();
         this.refresh();
@@ -481,7 +483,68 @@ const UIController = {
                 
                 document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
+                
+                // Zatvori mobilni meni nakon izbora
+                const navContainer = document.querySelector('.nav .container');
+                if (navContainer.classList.contains('open')) {
+                    navContainer.classList.remove('open');
+                }
             });
+        });
+    },
+    
+    /**
+     * Postavlja mobilni hamburger meni
+     */
+    setupMobileMenu() {
+        // Kreiraj hamburger dugme ako ne postoji
+        const nav = document.querySelector('.nav');
+        const navContainer = nav.querySelector('.container');
+        
+        let toggleBtn = document.querySelector('.nav-toggle');
+        if (!toggleBtn) {
+            toggleBtn = document.createElement('button');
+            toggleBtn.className = 'nav-toggle';
+            toggleBtn.innerHTML = '☰';
+            toggleBtn.setAttribute('aria-label', 'Toggle navigation');
+            nav.insertBefore(toggleBtn, navContainer);
+        }
+        
+        toggleBtn.addEventListener('click', () => {
+            navContainer.classList.toggle('open');
+            toggleBtn.innerHTML = navContainer.classList.contains('open') ? '✕' : '☰';
+        });
+        
+        // Zatvori meni kada se klikne van njega
+        document.addEventListener('click', (e) => {
+            if (!nav.contains(e.target) && navContainer.classList.contains('open')) {
+                navContainer.classList.remove('open');
+                toggleBtn.innerHTML = '☰';
+            }
+        });
+    },
+    
+    /**
+     * Postavlja scroll efekte za header i nav
+     */
+    setupScrollEffects() {
+        let lastScroll = 0;
+        const header = document.querySelector('.header');
+        const nav = document.querySelector('.nav');
+        
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            
+            // Dodaj 'scrolled' klasu kada se skroluje
+            if (currentScroll > 10) {
+                header.classList.add('scrolled');
+                nav.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+                nav.classList.remove('scrolled');
+            }
+            
+            lastScroll = currentScroll;
         });
     },
     
