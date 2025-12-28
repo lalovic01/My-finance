@@ -3,14 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Lično finansijsko praćenje - pratite zaradu, troškove, gotovinu i depozite">
+    <meta name="theme-color" content="#14213d">
     <title>My Finance - Lično Finansijsko Praćenje</title>
     <link rel="stylesheet" href="style.css">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+        <p>Učitavanje...</p>
+    </div>
+
     <!-- Header -->
-    <header class="header">
+    <header class="header" role="banner">
         <div class="container">
             <h1>💰 My Finance</h1>
             <div class="exchange-rate" id="exchangeRateDisplay">
@@ -21,7 +29,7 @@
     </header>
 
     <!-- Navigation -->
-    <nav class="nav">
+    <nav class="nav" role="navigation" aria-label="Glavna navigacija">
         <!-- Hamburger dugme će biti dodato dinamički preko JavaScript-a -->
         <div class="container">
             <button class="nav-btn active" data-section="dashboard">📊 Dashboard</button>
@@ -34,37 +42,37 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="main">
+    <main class="main" role="main">
         <div class="container">
             
             <!-- Dashboard Section -->
-            <section id="dashboard" class="section active">
-                <h2>📊 Dashboard</h2>
+            <section id="dashboard" class="section active" role="region" aria-labelledby="dashboard-heading">
+                <h2 id="dashboard-heading">📊 Dashboard</h2>
                 
                 <!-- TRENUTNO STANJE BOGATSTVA -->
                 <div class="glass-card" style="background: rgba(252, 163, 17, 0.05); border: 2px solid var(--orange);">
                     <h3 style="color: var(--orange); margin-bottom: 20px;">💎 TRENUTNO STANJE BOGATSTVA</h3>
                     
                     <div class="cards-grid">
-                        <div class="glass-card">
+                        <div class="glass-card" role="article" aria-label="Stanje na kartici">
                             <h3>💳 Kartica/Račun</h3>
                             <div class="amount" id="totalCardRSD">0 RSD</div>
                             <small style="color: var(--alabaster-grey);">Tekući račun u banci</small>
                         </div>
                         
-                        <div class="glass-card">
+                        <div class="glass-card" role="article" aria-label="EUR gotovina">
                             <h3>💶 Gotovina EUR</h3>
                             <div class="amount" id="totalCashEUR">0 EUR</div>
                             <div class="amount-small" id="totalCashEURtoRSD">0 RSD</div>
                         </div>
                         
-                        <div class="glass-card">
+                        <div class="glass-card" role="article" aria-label="RSD gotovina">
                             <h3>💵 Gotovina RSD</h3>
                             <div class="amount" id="totalCashRSD">0 RSD</div>
                             <small style="color: var(--alabaster-grey);">Dinarska gotovina</small>
                         </div>
                         
-                        <div class="glass-card">
+                        <div class="glass-card" role="article" aria-label="Oročeni depoziti">
                             <h3>🏦 Oročeni Depoziti</h3>
                             <div class="amount" id="totalDepositsRSD">0 RSD</div>
                             <small id="activeDepositsCount" style="color: var(--alabaster-grey);">0 aktivnih</small>
@@ -72,7 +80,7 @@
                     </div>
                     
                     <!-- UKUPNO -->
-                    <div class="glass-card total-wealth" style="margin-top: 20px;">
+                    <div class="glass-card total-wealth" style="margin-top: 20px;" role="article" aria-label="Ukupno bogatstvo">
                         <h2>💎 UKUPNO BOGATSTVO</h2>
                         <div class="total-amount" id="totalWealth">0 RSD</div>
                         <small style="opacity: 0.8; font-size: 14px; color: var(--alabaster-grey);">Kartica + Gotovina + Depoziti</small>
@@ -131,8 +139,8 @@
             </section>
 
             <!-- Salary Section -->
-            <section id="salary" class="section">
-                <h2>💼 Plata i Zarada</h2>
+            <section id="salary" class="section" role="region" aria-labelledby="salary-heading">
+                <h2 id="salary-heading">💼 Plata i Zarada</h2>
                 
                 <div class="glass-card info-banner">
                     <p>ℹ️ <strong>Napomena:</strong> Ovde unosite samo prihode (platu, bonuse, nagrade) za praćenje koliko ste zaradili kroz godine. 
@@ -141,21 +149,22 @@
                 
                 <div class="glass-card">
                     <h3>Dodaj Novu Zaradu</h3>
-                    <form id="salaryForm" class="form">
+                    <form id="salaryForm" class="form" novalidate>
                         <div style="display: flex; justify-content: flex-end; margin-bottom: 12px;">
-                            <button type="button" id="copyLastSalary" class="btn" style="padding: 8px 16px; font-size: 14px; background: rgba(99, 102, 241, 0.6);">
+                            <button type="button" id="copyLastSalary" class="btn" style="padding: 8px 16px; font-size: 14px; background: rgba(99, 102, 241, 0.6);" aria-label="Kopiraj poslednji unos">
                                 📋 Kopiraj Poslednji Unos
                             </button>
                         </div>
                         
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Godina</label>
-                                <input type="number" id="salaryYear" min="2020" max="2100" required>
+                                <label for="salaryYear">Godina</label>
+                                <input type="number" id="salaryYear" min="2020" max="2100" required aria-required="true" aria-describedby="salaryYearError">
+                                <span class="error-message" id="salaryYearError" role="alert"></span>
                             </div>
                             <div class="form-group">
-                                <label>Mesec</label>
-                                <select id="salaryMonth" required>
+                                <label for="salaryMonth">Mesec</label>
+                                <select id="salaryMonth" required aria-required="true">
                                     <option value="1">Januar</option>
                                     <option value="2">Februar</option>
                                     <option value="3">Mart</option>
@@ -173,13 +182,15 @@
                         </div>
                         
                         <div class="form-group">
-                            <label>Opis (npr. "Plata Januar", "Bonus", "Projekat")</label>
-                            <input type="text" id="salaryDescription" placeholder="Plata" required>
+                            <label for="salaryDescription">Opis (npr. "Plata Januar", "Bonus", "Projekat")</label>
+                            <input type="text" id="salaryDescription" placeholder="Plata" required aria-required="true" maxlength="100" aria-describedby="salaryDescError">
+                            <span class="error-message" id="salaryDescError" role="alert"></span>
                         </div>
                         
                         <div class="form-group">
-                            <label>Iznos (RSD)</label>
-                            <input type="number" id="salaryAmount" step="0.01" required>
+                            <label for="salaryAmount">Iznos (RSD)</label>
+                            <input type="number" id="salaryAmount" step="0.01" min="0.01" required aria-required="true" aria-describedby="salaryAmountError">
+                            <span class="error-message" id="salaryAmountError" role="alert"></span>
                         </div>
                         
                         <button type="submit" class="btn">💰 Dodaj Zaradu</button>
@@ -187,7 +198,12 @@
                 </div>
 
                 <div class="glass-card">
-                    <h3>Svi Unosi Zarade</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                        <h3 style="margin: 0;">Svi Unosi Zarade</h3>
+                        <button id="sortSalaryBtn" class="btn-icon" title="Promeni sortiranje" aria-label="Promeni sortiranje">
+                            <span id="sortSalaryIcon">🔽</span> Sortiraj
+                        </button>
+                    </div>
                     <div class="filter-controls">
                         <select id="filterYear">
                             <option value="">Sve godine</option>
@@ -208,13 +224,13 @@
                             <option value="12">Decembar</option>
                         </select>
                     </div>
-                    <div id="salaryEntriesList" class="entries-list"></div>
+                    <div id="salaryEntriesList" class="entries-list" role="list"></div>
                 </div>
             </section>
 
             <!-- Card/Account Section -->
-            <section id="card" class="section">
-                <h2>💳 Kartica i Tekući Račun (RSD)</h2>
+            <section id="card" class="section" role="region" aria-labelledby="card-heading">
+                <h2 id="card-heading">💳 Kartica i Tekući Račun (RSD)</h2>
                 
                 <div class="glass-card balance-display">
                     <h3>Trenutno Stanje</h3>
@@ -223,23 +239,25 @@
 
                 <div class="glass-card">
                     <h3>Nova Transakcija</h3>
-                    <form id="cardForm" class="form">
+                    <form id="cardForm" class="form" novalidate>
                         <div class="form-group">
-                            <label>Opis</label>
-                            <input type="text" id="cardDescription" required>
+                            <label for="cardDescription">Opis</label>
+                            <input type="text" id="cardDescription" required aria-required="true" maxlength="100" aria-describedby="cardDescError">
+                            <span class="error-message" id="cardDescError" role="alert"></span>
                         </div>
                         
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Tip</label>
-                                <select id="cardType" required>
+                                <label for="cardType">Tip</label>
+                                <select id="cardType" required aria-required="true">
                                     <option value="income">Primanje (Plata)</option>
                                     <option value="expense">Trošenje</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Iznos (RSD)</label>
-                                <input type="number" id="cardAmount" step="0.01" required>
+                                <label for="cardAmount">Iznos (RSD)</label>
+                                <input type="number" id="cardAmount" step="0.01" min="0.01" required aria-required="true" aria-describedby="cardAmountError">
+                                <span class="error-message" id="cardAmountError" role="alert"></span>
                             </div>
                         </div>
                         
@@ -254,8 +272,8 @@
             </section>
 
             <!-- Cash EUR/RSD Section -->
-            <section id="cash" class="section">
-                <h2>💰 Kućna Gotovina (EUR & RSD)</h2>
+            <section id="cash" class="section" role="region" aria-labelledby="cash-heading">
+                <h2 id="cash-heading">💰 Kućna Gotovina (EUR & RSD)</h2>
                 
                 <div class="cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
                     <div class="glass-card balance-display">
@@ -342,8 +360,8 @@
             </section>
 
             <!-- Term Deposits Section -->
-            <section id="deposits" class="section">
-                <h2>🏦 Oročena Štednja</h2>
+            <section id="deposits" class="section" role="region" aria-labelledby="deposits-heading">
+                <h2 id="deposits-heading">🏦 Oročena Štednja</h2>
                 
                 <div class="glass-card">
                     <h3>Dodaj Novi Depozit</h3>
@@ -394,8 +412,8 @@
             </section>
 
             <!-- Settings Section -->
-            <section id="settings" class="section">
-                <h2>⚙️ Podešavanja</h2>
+            <section id="settings" class="section" role="region" aria-labelledby="settings-heading">
+                <h2 id="settings-heading">⚙️ Podešavanja</h2>
                 
                 <div class="glass-card">
                     <h3>Kurs EUR/RSD</h3>
@@ -425,11 +443,23 @@
     </main>
 
     <!-- Footer -->
-    <footer class="footer">
+    <footer class="footer" role="contentinfo">
         <div class="container">
             <p>&copy; 2025 My Finance | Lično Finansijsko Praćenje</p>
         </div>
     </footer>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle" style="display: none;">
+        <div class="modal-content">
+            <h3 id="confirmModalTitle">Potvrda</h3>
+            <p id="confirmModalMessage"></p>
+            <div class="modal-actions">
+                <button id="confirmModalCancel" class="btn btn-secondary">Otkaži</button>
+                <button id="confirmModalConfirm" class="btn btn-danger">Potvrdi</button>
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
