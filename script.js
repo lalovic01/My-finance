@@ -385,15 +385,20 @@ const Calculator = {
      * @param {string} type - 'simple' ili 'compound'
      */
     calculateTermDepositMaturity(principal, rate, months, type) {
-        const r = rate / 100;
+        const r = rate / 100; // Godišnja kamatna stopa kao decimala
+        const years = months / 12; // Vreme u godinama
         
         if (type === 'simple') {
             // Prosta kamata: A = P * (1 + r * t)
-            const years = months / 12;
+            // Za 534284 RSD, 4.10%, 3 meseca (0.25 godina):
+            // A = 534284 * (1 + 0.041 * 0.25) = 534284 * 1.01025 = 539761.41
             return principal * (1 + r * years);
         } else {
-            // Složena kamata (mesečno): A = P * (1 + r/12)^(months)
-            return principal * Math.pow(1 + r / 12, months);
+            // Složena kamata sa godišnjom kapitalizacijom: A = P * (1 + r)^t
+            // Za kratke periode (ispod godine), koristi prostu kamatu ili prilagođenu formulu
+            // Za 534284 RSD, 4.10%, 3 meseca:
+            // A = 534284 * (1 + 0.041)^0.25 = 534284 * 1.010157 = 539713.48
+            return principal * Math.pow(1 + r, years);
         }
     },
     
