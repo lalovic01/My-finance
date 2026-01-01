@@ -11,9 +11,12 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
+    <!-- Skip to content link -->
+    <a href="#main-content" class="skip-link">Preskoči na glavni sadržaj</a>
+
     <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
-        <div class="loading-spinner"></div>
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;" role="alert" aria-live="assertive" aria-busy="true">
+        <div class="loading-spinner" aria-hidden="true"></div>
         <p>Učitavanje...</p>
     </div>
 
@@ -21,9 +24,9 @@
     <header class="header" role="banner">
         <div class="container">
             <h1>💰 My Finance</h1>
-            <div class="exchange-rate" id="exchangeRateDisplay">
-                <span id="rateValue">Učitavanje kursa...</span>
-                <button id="refreshRate" class="icon-btn" title="Osveži kurs">🔄</button>
+            <div class="exchange-rate" id="exchangeRateDisplay" role="status" aria-live="polite">
+                <span id="rateValue" aria-label="Trenutni kurs valute">Učitavanje kursa...</span>
+                <button id="refreshRate" class="icon-btn" title="Osveži kurs" aria-label="Osveži kurs valute">🔄</button>
             </div>
         </div>
     </header>
@@ -32,7 +35,7 @@
     <nav class="nav" role="navigation" aria-label="Glavna navigacija">
         <!-- Hamburger dugme će biti dodato dinamički preko JavaScript-a -->
         <div class="container">
-            <button class="nav-btn active" data-section="dashboard">📊 Dashboard</button>
+            <button class="nav-btn active" data-section="dashboard" aria-current="page">📊 Dashboard</button>
             <button class="nav-btn" data-section="salary">💼 Plata/Zarada</button>
             <button class="nav-btn" data-section="card">💳 Kartica/Račun</button>
             <button class="nav-btn" data-section="cash">💶 Kućna Gotovina</button>
@@ -42,47 +45,50 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="main" role="main">
+    <main class="main" role="main" id="main-content" tabindex="-1">
         <div class="container">
             
             <!-- Dashboard Section -->
             <section id="dashboard" class="section active" role="region" aria-labelledby="dashboard-heading">
                 <h2 id="dashboard-heading">📊 Dashboard</h2>
                 
+                <!-- Live region for dynamic updates -->
+                <div class="sr-only" role="status" aria-live="polite" aria-atomic="true" id="dashboardAnnouncer"></div>
+                
                 <!-- TRENUTNO STANJE BOGATSTVA -->
                 <div class="glass-card" style="background: rgba(252, 163, 17, 0.05); border: 2px solid var(--orange);">
                     <h3 style="color: var(--orange); margin-bottom: 20px;">💎 TRENUTNO STANJE BOGATSTVA</h3>
                     
                     <div class="cards-grid">
-                        <div class="glass-card" role="article" aria-label="Stanje na kartici">
-                            <h3>💳 Kartica/Račun</h3>
-                            <div class="amount" id="totalCardRSD">0 RSD</div>
+                        <div class="glass-card" role="article" aria-labelledby="card-balance-heading">
+                            <h3 id="card-balance-heading">💳 Kartica/Račun</h3>
+                            <div class="amount" id="totalCardRSD" aria-label="Stanje na kartici">0 RSD</div>
                             <small style="color: var(--alabaster-grey);">Tekući račun u banci</small>
                         </div>
                         
-                        <div class="glass-card" role="article" aria-label="EUR gotovina">
-                            <h3>💶 Gotovina EUR</h3>
-                            <div class="amount" id="totalCashEUR">0 EUR</div>
-                            <div class="amount-small" id="totalCashEURtoRSD">0 RSD</div>
+                        <div class="glass-card" role="article" aria-labelledby="eur-balance-heading">
+                            <h3 id="eur-balance-heading">💶 Gotovina EUR</h3>
+                            <div class="amount" id="totalCashEUR" aria-label="Stanje u evrima">0 EUR</div>
+                            <div class="amount-small" id="totalCashEURtoRSD" aria-label="Ekvivalent u dinarima">0 RSD</div>
                         </div>
                         
-                        <div class="glass-card" role="article" aria-label="RSD gotovina">
-                            <h3>💵 Gotovina RSD</h3>
-                            <div class="amount" id="totalCashRSD">0 RSD</div>
+                        <div class="glass-card" role="article" aria-labelledby="rsd-balance-heading">
+                            <h3 id="rsd-balance-heading">💵 Gotovina RSD</h3>
+                            <div class="amount" id="totalCashRSD" aria-label="Stanje u dinarima">0 RSD</div>
                             <small style="color: var(--alabaster-grey);">Dinarska gotovina</small>
                         </div>
                         
-                        <div class="glass-card" role="article" aria-label="Oročeni depoziti">
-                            <h3>🏦 Oročeni Depoziti</h3>
-                            <div class="amount" id="totalDepositsRSD">0 RSD</div>
-                            <small id="activeDepositsCount" style="color: var(--alabaster-grey);">0 aktivnih</small>
+                        <div class="glass-card" role="article" aria-labelledby="deposits-balance-heading">
+                            <h3 id="deposits-balance-heading">🏦 Oročeni Depoziti</h3>
+                            <div class="amount" id="totalDepositsRSD" aria-label="Ukupno oročeno">0 RSD</div>
+                            <small id="activeDepositsCount" style="color: var(--alabaster-grey);" aria-label="Broj aktivnih depozita">0 aktivnih</small>
                         </div>
                     </div>
                     
                     <!-- UKUPNO -->
-                    <div class="glass-card total-wealth" style="margin-top: 20px;" role="article" aria-label="Ukupno bogatstvo">
-                        <h2>💎 UKUPNO BOGATSTVO</h2>
-                        <div class="total-amount" id="totalWealth">0 RSD</div>
+                    <div class="glass-card total-wealth" style="margin-top: 20px;" role="article" aria-labelledby="total-wealth-heading">
+                        <h2 id="total-wealth-heading">💎 UKUPNO BOGATSTVO</h2>
+                        <div class="total-amount" id="totalWealth" aria-label="Ukupno bogatstvo">0 RSD</div>
                         <small style="opacity: 0.8; font-size: 14px; color: var(--alabaster-grey);">Kartica + Gotovina + Depoziti</small>
                     </div>
                 </div>
@@ -142,29 +148,39 @@
             <section id="salary" class="section" role="region" aria-labelledby="salary-heading">
                 <h2 id="salary-heading">💼 Plata i Zarada</h2>
                 
-                <div class="glass-card info-banner">
+                <!-- Live region for salary updates -->
+                <div class="sr-only" role="status" aria-live="polite" aria-atomic="true" id="salaryAnnouncer"></div>
+                
+                <div class="glass-card info-banner" role="note" aria-label="Informacija o statistici zarade">
                     <p>ℹ️ <strong>Napomena:</strong> Ovde unosite samo prihode (platu, bonuse, nagrade) za praćenje koliko ste zaradili kroz godine. 
                     Ovi podaci ne utiču na ukupno bogatstvo prikazano na Dashboard-u.</p>
                 </div>
                 
                 <div class="glass-card">
-                    <h3>Dodaj Novu Zaradu</h3>
-                    <form id="salaryForm" class="form" novalidate>
+                    <h3 id="add-salary-heading">Dodaj Novu Zaradu</h3>
+                    <form id="salaryForm" class="form" novalidate aria-labelledby="add-salary-heading">
                         <div style="display: flex; justify-content: flex-end; margin-bottom: 12px;">
-                            <button type="button" id="copyLastSalary" class="btn" style="padding: 8px 16px; font-size: 14px; background: rgba(99, 102, 241, 0.6);" aria-label="Kopiraj poslednji unos">
+                            <button type="button" id="copyLastSalary" class="btn" 
+                                    style="padding: 8px 16px; font-size: 14px; background: rgba(99, 102, 241, 0.6);" 
+                                    aria-label="Kopiraj podatke iz poslednjeg unosa">
                                 📋 Kopiraj Poslednji Unos
                             </button>
                         </div>
                         
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="salaryYear">Godina</label>
-                                <input type="number" id="salaryYear" min="2020" max="2100" required aria-required="true" aria-describedby="salaryYearError">
-                                <span class="error-message" id="salaryYearError" role="alert"></span>
+                                <label for="salaryYear">Godina <span class="required-indicator" aria-label="obavezno polje">*</span></label>
+                                <input type="number" id="salaryYear" min="2020" max="2100" 
+                                       required aria-required="true" 
+                                       aria-describedby="salaryYearError salaryYearHelp"
+                                       aria-invalid="false">
+                                <span class="sr-only" id="salaryYearHelp">Unesite godinu zarade, između 2020 i 2100</span>
+                                <span class="error-message" id="salaryYearError" role="alert" aria-live="assertive"></span>
                             </div>
                             <div class="form-group">
-                                <label for="salaryMonth">Mesec</label>
-                                <select id="salaryMonth" required aria-required="true">
+                                <label for="salaryMonth">Mesec <span class="required-indicator" aria-label="obavezno polje">*</span></label>
+                                <select id="salaryMonth" required aria-required="true" aria-describedby="salaryMonthHelp">
+                                    <option value="">Izaberite mesec</option>
                                     <option value="1">Januar</option>
                                     <option value="2">Februar</option>
                                     <option value="3">Mart</option>
@@ -178,19 +194,31 @@
                                     <option value="11">Novembar</option>
                                     <option value="12">Decembar</option>
                                 </select>
+                                <span class="sr-only" id="salaryMonthHelp">Izaberite mesec u kojem ste ostvarili zaradu</span>
                             </div>
                         </div>
                         
                         <div class="form-group">
-                            <label for="salaryDescription">Opis (npr. "Plata Januar", "Bonus", "Projekat")</label>
-                            <input type="text" id="salaryDescription" placeholder="Plata" required aria-required="true" maxlength="100" aria-describedby="salaryDescError">
-                            <span class="error-message" id="salaryDescError" role="alert"></span>
+                            <label for="salaryDescription">
+                                Opis <span class="required-indicator" aria-label="obavezno polje">*</span>
+                                <span class="field-hint">(npr. "Plata Januar", "Bonus", "Projekat")</span>
+                            </label>
+                            <input type="text" id="salaryDescription" placeholder="Plata" 
+                                   required aria-required="true" maxlength="100" 
+                                   aria-describedby="salaryDescError salaryDescHelp"
+                                   aria-invalid="false">
+                            <span class="sr-only" id="salaryDescHelp">Unesite kratak opis zarade, maksimalno 100 karaktera</span>
+                            <span class="error-message" id="salaryDescError" role="alert" aria-live="assertive"></span>
                         </div>
                         
                         <div class="form-group">
-                            <label for="salaryAmount">Iznos (RSD)</label>
-                            <input type="number" id="salaryAmount" step="0.01" min="0.01" required aria-required="true" aria-describedby="salaryAmountError">
-                            <span class="error-message" id="salaryAmountError" role="alert"></span>
+                            <label for="salaryAmount">Iznos (RSD) <span class="required-indicator" aria-label="obavezno polje">*</span></label>
+                            <input type="number" id="salaryAmount" step="0.01" min="0.01" 
+                                   required aria-required="true" 
+                                   aria-describedby="salaryAmountError salaryAmountHelp"
+                                   aria-invalid="false">
+                            <span class="sr-only" id="salaryAmountHelp">Unesite iznos zarade u dinarima, veći od nule</span>
+                            <span class="error-message" id="salaryAmountError" role="alert" aria-live="assertive"></span>
                         </div>
                         
                         <button type="submit" class="btn">💰 Dodaj Zaradu</button>
@@ -199,16 +227,21 @@
 
                 <div class="glass-card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
-                        <h3 style="margin: 0;">Svi Unosi Zarade</h3>
-                        <button id="sortSalaryBtn" class="btn-icon" title="Promeni sortiranje" aria-label="Promeni sortiranje">
-                            <span id="sortSalaryIcon">🔽</span> Sortiraj
+                        <h3 style="margin: 0;" id="salary-list-heading">Svi Unosi Zarade</h3>
+                        <button id="sortSalaryBtn" class="btn-icon" 
+                                title="Promeni sortiranje" 
+                                aria-label="Promeni redosled sortiranja unosa"
+                                aria-pressed="false">
+                            <span id="sortSalaryIcon" aria-hidden="true">🔽</span> Sortiraj
                         </button>
                     </div>
-                    <div class="filter-controls">
-                        <select id="filterYear">
+                    <div class="filter-controls" role="group" aria-label="Filteri za zaradu">
+                        <label for="filterYear" class="sr-only">Filtriraj po godini</label>
+                        <select id="filterYear" aria-label="Filtriraj po godini">
                             <option value="">Sve godine</option>
                         </select>
-                        <select id="filterMonth">
+                        <label for="filterMonth" class="sr-only">Filtriraj po mesecu</label>
+                        <select id="filterMonth" aria-label="Filtriraj po mesecu">
                             <option value="">Svi meseci</option>
                             <option value="1">Januar</option>
                             <option value="2">Februar</option>
@@ -224,7 +257,7 @@
                             <option value="12">Decembar</option>
                         </select>
                     </div>
-                    <div id="salaryEntriesList" class="entries-list" role="list"></div>
+                    <div id="salaryEntriesList" class="entries-list" role="list" aria-labelledby="salary-list-heading" aria-live="polite"></div>
                 </div>
             </section>
 
@@ -232,32 +265,45 @@
             <section id="card" class="section" role="region" aria-labelledby="card-heading">
                 <h2 id="card-heading">💳 Kartica i Tekući Račun (RSD)</h2>
                 
-                <div class="glass-card balance-display">
-                    <h3>Trenutno Stanje</h3>
-                    <div class="amount large" id="cardBalance">0 RSD</div>
+                <!-- Live region for card updates -->
+                <div class="sr-only" role="status" aria-live="polite" aria-atomic="true" id="cardAnnouncer"></div>
+                
+                <div class="glass-card balance-display" role="status" aria-live="polite">
+                    <h3 id="card-current-balance">Trenutno Stanje</h3>
+                    <div class="amount large" id="cardBalance" aria-labelledby="card-current-balance">0 RSD</div>
                 </div>
 
                 <div class="glass-card">
-                    <h3>Nova Transakcija</h3>
-                    <form id="cardForm" class="form" novalidate>
+                    <h3 id="add-transaction-heading">Nova Transakcija</h3>
+                    <form id="cardForm" class="form" novalidate aria-labelledby="add-transaction-heading">
                         <div class="form-group">
-                            <label for="cardDescription">Opis</label>
-                            <input type="text" id="cardDescription" required aria-required="true" maxlength="100" aria-describedby="cardDescError">
-                            <span class="error-message" id="cardDescError" role="alert"></span>
+                            <label for="cardDescription">Opis <span class="required-indicator" aria-label="obavezno polje">*</span></label>
+                            <input type="text" id="cardDescription" 
+                                   required aria-required="true" maxlength="100" 
+                                   aria-describedby="cardDescError cardDescHelp"
+                                   aria-invalid="false">
+                            <span class="sr-only" id="cardDescHelp">Unesite opis transakcije, maksimalno 100 karaktera</span>
+                            <span class="error-message" id="cardDescError" role="alert" aria-live="assertive"></span>
                         </div>
                         
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="cardType">Tip</label>
-                                <select id="cardType" required aria-required="true">
+                                <label for="cardType">Tip <span class="required-indicator" aria-label="obavezno polje">*</span></label>
+                                <select id="cardType" required aria-required="true" aria-describedby="cardTypeHelp">
+                                    <option value="">Izaberite tip</option>
                                     <option value="income">Primanje (Plata)</option>
                                     <option value="expense">Trošenje</option>
                                 </select>
+                                <span class="sr-only" id="cardTypeHelp">Izaberite da li je ovo primanje novca ili trošenje</span>
                             </div>
                             <div class="form-group">
-                                <label for="cardAmount">Iznos (RSD)</label>
-                                <input type="number" id="cardAmount" step="0.01" min="0.01" required aria-required="true" aria-describedby="cardAmountError">
-                                <span class="error-message" id="cardAmountError" role="alert"></span>
+                                <label for="cardAmount">Iznos (RSD) <span class="required-indicator" aria-label="obavezno polje">*</span></label>
+                                <input type="number" id="cardAmount" step="0.01" min="0.01" 
+                                       required aria-required="true" 
+                                       aria-describedby="cardAmountError cardAmountHelp"
+                                       aria-invalid="false">
+                                <span class="sr-only" id="cardAmountHelp">Unesite iznos transakcije u dinarima</span>
+                                <span class="error-message" id="cardAmountError" role="alert" aria-live="assertive"></span>
                             </div>
                         </div>
                         
@@ -266,8 +312,8 @@
                 </div>
 
                 <div class="glass-card">
-                    <h3>Istorija Transakcija</h3>
-                    <div id="cardTransactionsList" class="entries-list"></div>
+                    <h3 id="card-transactions-heading">Istorija Transakcija</h3>
+                    <div id="cardTransactionsList" class="entries-list" role="list" aria-labelledby="card-transactions-heading" aria-live="polite"></div>
                 </div>
             </section>
 
@@ -275,16 +321,19 @@
             <section id="cash" class="section" role="region" aria-labelledby="cash-heading">
                 <h2 id="cash-heading">💰 Kućna Gotovina (EUR & RSD)</h2>
                 
+                <!-- Live region for cash updates -->
+                <div class="sr-only" role="status" aria-live="polite" aria-atomic="true" id="cashAnnouncer"></div>
+                
                 <div class="cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
                     <div class="glass-card balance-display">
                         <h3>💶 Stanje EUR</h3>
-                        <div class="amount large" id="cashBalanceEUR">0 EUR</div>
-                        <div class="amount-small" id="cashBalanceEURtoRSD">0 RSD</div>
+                        <div class="amount large" id="cashBalanceEUR" aria-label="Stanje u evrima">0 EUR</div>
+                        <div class="amount-small" id="cashBalanceEURtoRSD" aria-label="Ekvivalent u dinarima">0 RSD</div>
                     </div>
                     
                     <div class="glass-card balance-display">
                         <h3>💵 Stanje RSD</h3>
-                        <div class="amount large" id="cashBalanceRSD">0 RSD</div>
+                        <div class="amount large" id="cashBalanceRSD" aria-label="Stanje u dinarima">0 RSD</div>
                     </div>
                 </div>
 
@@ -363,6 +412,9 @@
             <section id="deposits" class="section" role="region" aria-labelledby="deposits-heading">
                 <h2 id="deposits-heading">🏦 Oročena Štednja</h2>
                 
+                <!-- Live region for deposits updates -->
+                <div class="sr-only" role="status" aria-live="polite" aria-atomic="true" id="depositsAnnouncer"></div>
+                
                 <div class="glass-card">
                     <h3>Dodaj Novi Depozit</h3>
                     <form id="depositForm" class="form">
@@ -437,6 +489,32 @@
                     <button id="resetData" class="btn btn-danger">🗑️ Obriši Sve Podatke</button>
                     <p class="help-text warning">⚠️ Ova akcija je nepovratna!</p>
                 </div>
+
+                <div class="glass-card">
+                    <h3>Prečice na tastaturi</h3>
+                    <dl class="keyboard-shortcuts">
+                        <div class="shortcut-item">
+                            <dt><kbd>Alt</kbd> + <kbd>1-6</kbd></dt>
+                            <dd>Brza navigacija između sekcija</dd>
+                        </div>
+                        <div class="shortcut-item">
+                            <dt><kbd>Tab</kbd></dt>
+                            <dd>Navigacija napred kroz elemente</dd>
+                        </div>
+                        <div class="shortcut-item">
+                            <dt><kbd>Shift</kbd> + <kbd>Tab</kbd></dt>
+                            <dd>Navigacija nazad kroz elemente</dd>
+                        </div>
+                        <div class="shortcut-item">
+                            <dt><kbd>Enter</kbd> ili <kbd>Space</kbd></dt>
+                            <dd>Aktiviraj dugme ili link</dd>
+                        </div>
+                        <div class="shortcut-item">
+                            <dt><kbd>Esc</kbd></dt>
+                            <dd>Zatvori modal ili odustani</dd>
+                        </div>
+                    </dl>
+                </div>
             </section>
 
         </div>
@@ -450,8 +528,8 @@
     </footer>
 
     <!-- Confirmation Modal -->
-    <div id="confirmModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle" style="display: none;">
-        <div class="modal-content">
+    <div id="confirmModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle" aria-describedby="confirmModalMessage" style="display: none;">
+        <div class="modal-content" role="document">
             <h3 id="confirmModalTitle">Potvrda</h3>
             <p id="confirmModalMessage"></p>
             <div class="modal-actions">
