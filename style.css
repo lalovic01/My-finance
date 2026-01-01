@@ -1259,54 +1259,274 @@ html {
     outline-offset: 2px;
 }
 
+/* ========================================
+   ACCESSIBILITY IMPROVEMENTS
+======================================== */
+
+/* Screen reader only content */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
 /* Skip to content link */
 .skip-link {
     position: absolute;
-    top: -40px;
-    left: 0;
+    top: -100px;
+    left: 10px;
     background: var(--orange);
     color: var(--black);
-    padding: 8px 16px;
+    padding: 12px 24px;
     text-decoration: none;
-    font-weight: 600;
-    z-index: 10000;
+    font-weight: 700;
+    z-index: 10001;
+    border-radius: 8px;
+    box-shadow: var(--gold-shadow);
+    transition: top 0.3s ease;
 }
 
 .skip-link:focus {
-    top: 0;
+    top: 10px;
+    outline: 3px solid var(--white);
+    outline-offset: 2px;
+}
+
+/* Required field indicator */
+.required-indicator {
+    color: var(--danger);
+    font-weight: 700;
+    margin-left: 4px;
+}
+
+/* Field hints */
+.field-hint {
+    font-size: 12px;
+    color: var(--alabaster-grey);
+    font-weight: 400;
+    opacity: 0.8;
+    margin-left: 8px;
+}
+
+/* Keyboard shortcuts display */
+.keyboard-shortcuts {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.shortcut-item {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 20px;
+    align-items: center;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+}
+
+.shortcut-item dt {
+    font-weight: 600;
+    color: var(--orange);
+}
+
+.shortcut-item dd {
+    margin: 0;
+    color: var(--white);
+}
+
+kbd {
+    display: inline-block;
+    padding: 4px 8px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid var(--orange);
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--orange);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Enhanced focus styles for better visibility */
+*:focus-visible {
+    outline: 3px solid var(--orange);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
+.btn:focus-visible,
+.nav-btn:focus-visible {
+    outline: 3px solid var(--orange);
+    outline-offset: 3px;
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid var(--orange);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(252, 163, 17, 0.2);
+}
+
+/* Focus within for containers */
+.glass-card:focus-within {
+    border-color: var(--orange);
+    box-shadow: 0 0 0 4px rgba(252, 163, 17, 0.1);
+}
+
+/* High contrast support for links */
+a:not(.btn):not(.skip-link) {
+    color: var(--orange);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 2px;
+}
+
+a:not(.btn):not(.skip-link):hover {
+    color: #ffb633;
+    text-decoration-thickness: 3px;
+}
+
+/* Pressed state for toggle buttons */
+[aria-pressed="true"] {
+    background: rgba(252, 163, 17, 0.3);
+    border-color: var(--orange);
+}
+
+/* Invalid state indicators */
+[aria-invalid="true"] {
+    border-color: var(--danger) !important;
+    background: rgba(239, 68, 68, 0.1) !important;
+}
+
+[aria-invalid="true"]:focus {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2) !important;
+}
+
+/* Disabled state with clear visual indicator */
+:disabled,
+[aria-disabled="true"] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(50%);
+}
+
+/* Loading state for buttons */
+.btn[aria-busy="true"] {
+    position: relative;
+    color: transparent;
+    pointer-events: none;
+}
+
+.btn[aria-busy="true"]::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
 }
 
 /* ========================================
-   RESPONSIVE IMPROVEMENTS
+   HIGH CONTRAST MODE SUPPORT
 ======================================== */
 
-@media (max-width: 480px) {
-    .form-row {
+@media (prefers-contrast: high) {
+    .glass-card {
+        border-width: 3px;
+        border-style: solid;
+    }
+    
+    .btn {
+        border: 2px solid currentColor;
+    }
+    
+    *:focus-visible {
+        outline-width: 4px;
+        outline-style: solid;
+    }
+    
+    .entry-item::before {
+        width: 6px;
+    }
+}
+
+/* ========================================
+   REDUCED MOTION SUPPORT
+======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    
+    .skip-link {
+        transition: none;
+    }
+}
+
+/* ========================================
+   RESPONSIVE ACCESSIBILITY
+======================================== */
+
+@media (max-width: 768px) {
+    .skip-link {
+        left: 5px;
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+    
+    .skip-link:focus {
+        top: 5px;
+    }
+    
+    .shortcut-item {
         grid-template-columns: 1fr;
+        gap: 8px;
     }
     
-    .modal-content {
-        padding: 20px;
+    kbd {
+        font-size: 11px;
+        padding: 3px 6px;
+    }
+}
+
+/* ========================================
+   TOUCH TARGET SIZES (WCAG 2.5.5)
+======================================== */
+
+@media (pointer: coarse) {
+    .btn,
+    .nav-btn,
+    button,
+    a {
+        min-height: 44px;
+        min-width: 44px;
+        padding: 12px 16px;
     }
     
-    .modal-actions {
-        flex-direction: column;
-    }
-    
-    .modal-actions button {
-        width: 100%;
-    }
-    
-    .header h1 {
-        font-size: 18px;
-    }
-    
-    .section h2 {
-        font-size: 20px;
-    }
-    
-    .total-amount {
-        font-size: 32px;
+    .entry-actions button {
+        min-height: 44px;
+        min-width: 44px;
+        padding: 10px 16px;
     }
 }
 
