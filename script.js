@@ -450,13 +450,155 @@ const Calculator = {
 };
 
 // ========================================
+// ACCESSIBILITY SERVICE
+// ========================================
+
+const AccessibilityService = {
+    /**
+     * Announces message to screen readers
+     */
+    announce(message, priority = 'polite', section = 'dashboard') {
+        const announcer = document.getElementById(`${section}Announcer`);
+        if (announcer) {
+            announcer.textContent = message;
+            // Clear after announcement
+            setTimeout(() => {
+                announcer.textContent = '';
+            }, 1000);
+        }
+    },
+    
+    /**
+     * Manages focus after actions
+     */
+    manageFocus(element) {
+        if (element) {
+            element.focus();
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    },
+    
+    /**
+     * Sets up keyboard shortcuts
+     */
+    setupKeyboardShortcuts() {
+        document.addEventListener('keydown', (e) => {
+            // Alt + number keys for section navigation
+            if (e.altKey && !e.shiftKey && !e.ctrlKey) {
+                const shortcuts = {
+                    '1': 'dashboard',
+                    '2': 'salary',
+                    '3': 'card',
+                    '4': 'cash',
+                    '5': 'deposits',
+                    '6': 'settings'
+                };
+                
+                const section = shortcuts[e.key];
+                if (section) {
+                    e.preventDefault();
+                    UIController.showSection(section);
+                    const navBtn = document.querySelector(`[data-section="${section}"]`);
+                    if (navBtn) {
+                        navBtn.focus();
+                    }
+                    this.announce(`Prešli ste na sekciju ${this.getSectionName(section)}`, 'assertive');
+                }
+            }
+            
+            // Escape to close modals
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('confirmModal');
+                if (modal && modal.style.display !== 'none') {
+                    modal.style.display = 'none';
+                    this.announce('Modal zatvoren', 'polite');
+                }
+            }
+        });
+    },
+    
+    /**
+     * Gets section name for announcements
+     */
+    getSectionName(section) {
+        const names = {
+            'dashboard': 'Dashboard',
+            'salary': 'Plata i Zarada',
+            'card': 'Kartica i Račun',
+            'cash': 'Kućna Gotovina',
+            'deposits': 'Oročena Štednja',
+            'settings': 'Podešavanja'
+        };
+        return names[section] || section;
+    },
+    
+    /**
+     * Traps focus within modal
+     */
+    trapFocus(element) {
+        const focusableElements = element.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        const firstFocusable = focusableElements[0];
+        const lastFocusable = focusableElements[focusableElements.length - 1];
+        
+        element.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                if (e.shiftKey) {
+                    if (document.activeElement === firstFocusable) {
+                        e.preventDefault();
+                        lastFocusable.focus();
+                    }
+                } else {
+                    if (document.activeElement === lastFocusable) {
+                        e.preventDefault();
+                        firstFocusable.focus();
+                    }
+                }
+            }
+        });
+        
+        // Focus first element
+        firstFocusable?.focus();
+    },
+    
+    /**
+     * Updates ARIA attributes for form validation
+     */
+    updateFormAria(inputId, isValid, errorMessage = '') {
+        const input = document.getElementById(inputId);
+        const errorSpan = document.getElementById(`${inputId}Error`);
+        
+        if (input) {
+            input.setAttribute('aria-invalid', !isValid);
+            
+            if (errorSpan) {
+                errorSpan.textContent = errorMessage;
+                if (errorMessage) {
+                    this.announce(`Greška u polju: ${errorMessage}`, 'assertive');
+                }
+            }
+        }
+    },
+    
+    /**
+     * Updates sort button state
+     */
+    updateSortButtonAria(buttonId, isAscending) {
+        const button = document.getElementById(buttonId);
+        if (button) {
+            button.setAttribute('aria-pressed', 'true');
+            const label = isAscending ? 'Sortirano rastuće' : 'Sortirano opadajuće';
+            button.setAttribute('aria-label', `${label}. Kliknite da promenite redosled`);
+        }
+    }
+};
+
+// ========================================
 // UI CONTROLLER
 // ========================================
 
 const UIController = {
-    /**
-     * Inicijalizuje UI i event listenere
-     */
     init() {
         this.setupNavigation();
         this.setupMobileMenu();
@@ -466,7 +608,17 @@ const UIController = {
         this.refresh();
         this.updateExchangeRateDisplay();
         
-        // Inicijalizuj grafikone nakon što se učitaju podaci
+        // Initialize accessibility features
+        AccessibilityService.setupKeyboardShortcuts();
+        
+        // Set up modal focus trap
+        const modal = document.getElementById('confirmModal');
+        if (modal) {
+            modal.addEventListener('show', () => {
+                AccessibilityService.trapFocus(modal);
+            });
+        }
+        
         setTimeout(() => {
             ChartModule.initCharts();
         }, 500);
@@ -475,19 +627,30 @@ const UIController = {
         document.getElementById('salaryYear').value = now.getFullYear();
         document.getElementById('salaryMonth').value = now.getMonth() + 1;
         document.getElementById('depositStartDate').value = now.toISOString().split('T')[0];
+        
+        // Announce app ready
+        AccessibilityService.announce('Aplikacija je spremna za korišćenje', 'polite');
     },
     
-    /**
-     * Postavlja navigaciju između sekcija
-     */
     setupNavigation() {
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const section = btn.dataset.section;
                 this.showSection(section);
                 
-                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                // Update ARIA states
+                document.querySelectorAll('.nav-btn').forEach(b => {
+                    b.classList.remove('active');
+                    b.removeAttribute('aria-current');
+                });
                 btn.classList.add('active');
+                btn.setAttribute('aria-current', 'page');
+                
+                // Announce section change
+                AccessibilityService.announce(
+                    `Prešli ste na sekciju ${AccessibilityService.getSectionName(section)}`,
+                    'polite'
+                );
                 
                 // Zatvori mobilni meni nakon izbora
                 const navContainer = document.querySelector('.nav .container');
@@ -560,8 +723,15 @@ const UIController = {
         document.querySelectorAll('.section').forEach(section => {
             section.classList.remove('active');
         });
-        document.getElementById(sectionId).classList.add('active');
+        const targetSection = document.getElementById(sectionId);
+        targetSection.classList.add('active');
         AppState.currentSection = sectionId;
+        
+        // Move focus to main content
+        const mainContent = document.getElementById('main-content');
+        if (mainContent) {
+            mainContent.focus();
+        }
         
         if (sectionId === 'dashboard') this.refreshDashboard();
         if (sectionId === 'salary') this.refreshSalaryEntries();
@@ -577,13 +747,38 @@ const UIController = {
         // Zarada
         document.getElementById('salaryForm').addEventListener('submit', (e) => {
             e.preventDefault();
+            
+            // Validation
             const year = document.getElementById('salaryYear').value;
             const month = document.getElementById('salaryMonth').value;
             const description = document.getElementById('salaryDescription').value;
             const amount = document.getElementById('salaryAmount').value;
             
-            if (parseFloat(amount) <= 0) {
-                alert('⚠️ Iznos mora biti veći od 0!');
+            let isValid = true;
+            
+            if (!year || year < 2020 || year > 2100) {
+                AccessibilityService.updateFormAria('salaryYear', false, 'Godina mora biti između 2020 i 2100');
+                isValid = false;
+            } else {
+                AccessibilityService.updateFormAria('salaryYear', true);
+            }
+            
+            if (!description.trim()) {
+                AccessibilityService.updateFormAria('salaryDescription', false, 'Opis je obavezan');
+                isValid = false;
+            } else {
+                AccessibilityService.updateFormAria('salaryDescription', true);
+            }
+            
+            if (!amount || parseFloat(amount) <= 0) {
+                AccessibilityService.updateFormAria('salaryAmount', false, 'Iznos mora biti veći od 0');
+                isValid = false;
+            } else {
+                AccessibilityService.updateFormAria('salaryAmount', true);
+            }
+            
+            if (!isValid) {
+                AccessibilityService.announce('Molimo ispravite greške u formi', 'assertive', 'salary');
                 return;
             }
             
@@ -594,6 +789,16 @@ const UIController = {
             document.getElementById('salaryMonth').value = now.getMonth() + 1;
             this.refresh();
             this.showNotification('✅ Zarada uspešno dodata!', 'success');
+            
+            // Announce to screen readers
+            AccessibilityService.announce(
+                `Zarada od ${amount} dinara za ${this.getMonthName(month)} ${year} je uspešno dodata`,
+                'polite',
+                'salary'
+            );
+            
+            // Focus back to first field
+            document.getElementById('salaryYear').focus();
         });
         
         // Dugme za kopiranje prošlog unosa
@@ -785,7 +990,12 @@ const UIController = {
         document.getElementById('activeDepositsCount').textContent = `${AppState.termDeposits.length} aktivnih`;
         document.getElementById('totalWealth').textContent = this.formatCurrency(totalWealth, 'RSD');
         
-        // Godišnji pregled
+        // Announce summary
+        AccessibilityService.announce(
+            `Ukupno bogatstvo: ${this.formatCurrency(totalWealth, 'RSD')}`,
+            'polite'
+        );
+        
         this.refreshYearlyOverview();
     },
     
@@ -1056,35 +1266,35 @@ const UIController = {
     
     // Delete funkcije koje se pozivaju iz HTML-a
     deleteSalaryEntry(id) {
-        if (confirm('Da li ste sigurni da želite da obrišete ovaj unos?')) {
+        if (confirm('Da li ste sigurni da želite obrisati ovaj unos?')) {
             FinanceModule.deleteSalaryEntry(id);
             this.refresh();
         }
     },
     
     deleteCardTransaction(id) {
-        if (confirm('Da li ste sigurni da želite da obrišete ovu transakciju?')) {
+        if (confirm('Da li ste sigurni da želite obrisati ovu transakciju?')) {
             FinanceModule.deleteCardTransaction(id);
             this.refresh();
         }
     },
     
     deleteCashChangeEUR(id) {
-        if (confirm('Da li ste sigurni da želite da obrišete ovu promenu?')) {
+        if (confirm('Da li ste sigurni da želite obrisati ovu promenu?')) {
             FinanceModule.deleteCashChangeEUR(id);
             this.refresh();
         }
     },
     
     deleteCashChangeRSD(id) {
-        if (confirm('Da li ste sigurni da želite da obrišete ovu promenu?')) {
+        if (confirm('Da li ste sigurni da želite obrisati ovu promenu?')) {
             FinanceModule.deleteCashChangeRSD(id);
             this.refresh();
         }
     },
     
     deleteTermDeposit(id) {
-        if (confirm('Da li ste sigurni da želite da obrišete ovaj depozit?')) {
+        if (confirm('Da li ste sigurni da želite obrisati ovaj depozit?')) {
             FinanceModule.deleteTermDeposit(id);
             this.refresh();
         }
@@ -1131,12 +1341,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Inicijalizuj UI
     UIController.init();
-    
-    // Opciono: Učitaj demo podatke ako nema podataka
-    // if (AppState.salaryEntries.length === 0) {
-    //     loadDemoData();
-    //     UIController.refresh();
-    // }
     
     console.log('✅ App Ready');
 });
