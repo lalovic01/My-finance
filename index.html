@@ -36,8 +36,6 @@
         <!-- Hamburger dugme će biti dodato dinamički preko JavaScript-a -->
         <div class="container">
             <button class="nav-btn active" data-section="dashboard" aria-current="page">📊 Dashboard</button>
-            <button class="nav-btn" data-section="budget">💰 Budžet</button>
-            <button class="nav-btn" data-section="goals">🎯 Ciljevi</button>
             <button class="nav-btn" data-section="salary">💼 Plata/Zarada</button>
             <button class="nav-btn" data-section="card">💳 Kartica/Račun</button>
             <button class="nav-btn" data-section="cash">💶 Kućna Gotovina</button>
@@ -143,98 +141,6 @@
                     <div class="chart-container-wide">
                         <canvas id="salaryLineChart"></canvas>
                     </div>
-                </div>
-            </section>
-
-            <!-- Budget Section -->
-            <section id="budget" class="section" role="region" aria-labelledby="budget-heading">
-                <h2 id="budget-heading">💰 Mesečni Budžet</h2>
-                
-                <div class="glass-card info-banner">
-                    <p>ℹ️ <strong>Napomena:</strong> Postavite mesečne limite za različite kategorije troškova. 
-                    Aplikacija će automatski pratiti vašu potrošnju i upozoravati vas kada se približite limitu.</p>
-                </div>
-                
-                <!-- Budget Overview -->
-                <div class="glass-card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h3>📊 Pregled Budžeta za Trenutni Mesec</h3>
-                        <select id="budgetMonthSelect" style="padding: 8px; border-radius: 8px; background: rgba(0,0,0,0.5); color: white; border: 1px solid var(--orange);">
-                            <!-- Popunjava se dinamički -->
-                        </select>
-                    </div>
-                    <div id="budgetOverview"></div>
-                </div>
-                
-                <!-- Set Budget Form -->
-                <div class="glass-card">
-                    <h3>Podesi Budžet za Kategoriju</h3>
-                    <form id="budgetForm" class="form">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="budgetCategory">Kategorija *</label>
-                                <select id="budgetCategory" required>
-                                    <option value="">Izaberi kategoriju...</option>
-                                    <!-- Popunjava se dinamički -->
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="budgetAmount">Mesečni Limit (RSD) *</label>
-                                <input type="number" id="budgetAmount" step="100" min="0" required>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn">💾 Sačuvaj Budžet</button>
-                    </form>
-                </div>
-                
-                <!-- Spending by Category -->
-                <div class="glass-card">
-                    <h3>📈 Potrošnja po Kategorijama (Trenutni Mesec)</h3>
-                    <div class="chart-container">
-                        <canvas id="categorySpendingChart"></canvas>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Savings Goals Section -->
-            <section id="goals" class="section" role="region" aria-labelledby="goals-heading">
-                <h2 id="goals-heading">🎯 Ciljevi Štednje</h2>
-                
-                <div class="glass-card info-banner">
-                    <p>ℹ️ <strong>Napomena:</strong> Postavite finansijske ciljeve i pratite napredak ka njihovom ostvarenju. 
-                    Vizuelni prikaz vam pomaže da ostanete motivisani!</p>
-                </div>
-                
-                <!-- Add Goal Form -->
-                <div class="glass-card">
-                    <h3>Dodaj Novi Cilj</h3>
-                    <form id="goalsForm" class="form">
-                        <div class="form-group">
-                            <label for="goalName">Naziv Cilja *</label>
-                            <input type="text" id="goalName" placeholder="npr. Novi Laptop, Odmor" required maxlength="50">
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="goalTarget">Ciljni Iznos (RSD) *</label>
-                                <input type="number" id="goalTarget" step="100" min="100" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="goalCurrent">Trenutno Uštđeno (RSD)</label>
-                                <input type="number" id="goalCurrent" step="100" min="0" value="0">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="goalDeadline">Rok (opciono)</label>
-                            <input type="date" id="goalDeadline">
-                        </div>
-                        <button type="submit" class="btn">🎯 Dodaj Cilj</button>
-                    </form>
-                </div>
-                
-                <!-- Goals List -->
-                <div class="glass-card">
-                    <h3>Moji Ciljevi</h3>
-                    <div id="goalsList"></div>
                 </div>
             </section>
 
