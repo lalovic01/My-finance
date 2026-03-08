@@ -417,6 +417,13 @@ const Calculator = {
     },
     
     /**
+     * Konvertuje RSD u EUR
+     */
+    convertRSDtoEUR(amountRSD) {
+        return amountRSD / AppState.exchangeRate;
+    },
+    
+    /**
      * Izračunava vrednost oročenog depozita na kraju perioda
      * @param {number} principal - Glavnica
      * @param {number} rate - Godišnja kamatna stopa (%)
@@ -1115,6 +1122,9 @@ const UIController = {
         const depositsRSD = Calculator.calculateTotalDepositsValue();
         const totalWealth = Calculator.calculateTotalWealth();
         
+        // Konvertuj ukupno bogatstvo u EUR
+        const totalWealthEUR = Calculator.convertRSDtoEUR(totalWealth);
+        
         document.getElementById('totalSalaryRSD').textContent = this.formatCurrency(totalSalary, 'RSD');
         document.getElementById('totalCardRSD').textContent = this.formatCurrency(cardRSD, 'RSD');
         document.getElementById('totalCashEUR').textContent = this.formatCurrency(cashEUR, 'EUR');
@@ -1123,6 +1133,7 @@ const UIController = {
         document.getElementById('totalDepositsRSD').textContent = this.formatCurrency(depositsRSD, 'RSD');
         document.getElementById('activeDepositsCount').textContent = `${AppState.termDeposits.length} aktivnih`;
         document.getElementById('totalWealth').textContent = this.formatCurrency(totalWealth, 'RSD');
+        document.getElementById('totalWealthEUR').textContent = this.formatCurrency(totalWealthEUR, 'EUR');
         
         // Announce summary
         AccessibilityService.announce(
