@@ -49,51 +49,70 @@ const DEFAULT_CATEGORIES = [
 ];
 
 // ========================================
-// API SERVICE - Pribavljanje kursa
+// API SERVICE - Pribavljanje kursa (ALTERNATIVA)
 // ========================================
 
 const APIService = {
     /**
-     * Pribavlja trenutni EUR/RSD kurs preko FastForex API-ja
-     * Konvertuje USD → EUR → RSD
-     * Fallback na 117 RSD ako API ne radi
+     * Pribavlja trenutni EUR/RSD kurs
+     * Pokušava više izvora ako prvi ne uspe
      */
     async fetchExchangeRate() {
-        try {
-            // Pribavi USD → EUR
-            const responseUSDtoEUR = await fetch('https://api.fastforex.io/fetch-one?from=USD&to=EUR', {
-                headers: {
-                    'X-API-Key': '7f762ce40a-3a276c7aa7-t7xz3g'
-                }
-            });
-            const dataUSDtoEUR = await responseUSDtoEUR.json();
-            
-            // Pribavi USD → RSD
-            const responseUSDtoRSD = await fetch('https://api.fastforex.io/fetch-one?from=USD&to=RSD', {
-                headers: {
-                    'X-API-Key': '7f762ce40a-3a276c7aa7-t7xz3g'
-                }
-            });
-            const dataUSDtoRSD = await responseUSDtoRSD.json();
-            
-            if (dataUSDtoEUR.result && dataUSDtoRSD.result) {
-                const usdToEur = dataUSDtoEUR.result.EUR;
-                const usdToRsd = dataUSDtoRSD.result.RSD;
-                
-                // Izračunaj EUR → RSD: (USD → RSD) / (USD → EUR)
-                AppState.exchangeRate = usdToRsd / usdToEur;
-                AppState.lastRateUpdate = new Date().toISOString();
-                console.log('✅ Kurs uspešno preuzet:', AppState.exchangeRate.toFixed(2));
-                return AppState.exchangeRate;
-            } else {
-                throw new Error('Invalid API response');
+        // Lista besplatnih API-ja
+        const apiUrls = [
+            // API 1: exchangerate-api.com (najpouzdaniji)
+            {
+                url: 'https://api.exchangerate-api.com/v4/latest/EUR',
+                parse: (data) => data.rates.RSD
+            },
+            // API 2: frankfurter.app (Evropska centralna banka)
+            {
+                url: 'https://api.frankfurter.app/latest?from=EUR&to=RSD',
+                parse: (data) => data.rates.RSD
+            },
+            // API 3: exchangerate.host (backup)
+            {
+                url: 'https://api.exchangerate.host/latest?base=EUR&symbols=RSD',
+                parse: (data) => data.rates.RSD
             }
-        } catch (error) {
-            console.warn('⚠️ Greška pri preuzimanju kursa, koristi se fallback 117 RSD:', error);
-            AppState.exchangeRate = 117;
-            AppState.lastRateUpdate = new Date().toISOString();
-            return 117;
+        ];
+        
+        // Pokušaj sa svakim API-jem redom
+        for (const api of apiUrls) {
+            try {
+                console.log(`Pokušavam da preuzmem kurs sa: ${api.url}`);
+                const response = await fetch(api.url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const rate = api.parse(data);
+                
+                if (rate && rate > 0) {
+                    AppState.exchangeRate = rate;
+                    AppState.lastRateUpdate = new Date().toISOString();
+                    console.log('✅ Kurs uspešno preuzet:', rate.toFixed(2), 'RSD');
+                    return rate;
+                }
+            } catch (error) {
+                console.warn(`⚠️ Greška sa API-jem ${api.url}:`, error.message);
+                // Nastavi sa sledećim API-jem
+            }
         }
+        
+        // Ako nijedan API ne radi, koristi fallback
+        console.warn('⚠️ Svi API-ji nedostupni, koristi se fallback 117 RSD');
+        AppState.exchangeRate = 117;
+        AppState.lastRateUpdate = new Date().toISOString();
+        
+        // Prikaži upozorenje korisniku
+        if (typeof UIController !== 'undefined' && UIController.showNotification) {
+            UIController.showNotification('⚠️ Ne mogu da preuzmem trenutni kurs. Koristi se procenjeni kurs od 117 RSD.', 'warning');
+        }
+        
+        return 117;
     }
 };
 
