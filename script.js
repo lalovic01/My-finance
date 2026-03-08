@@ -29,12 +29,7 @@ const AppState = {
     cashHistoryRSD: [],
     termDeposits: [],
     currentSection: 'dashboard',
-    lastSalaryEntry: null,
-    // Nova polja
-    categories: [],
-    monthlyBudgets: [],
-    savingsGoals: [],
-    recurringTransactions: []
+    lastSalaryEntry: null
 };
 
 // Predefinisane kategorije
@@ -130,11 +125,6 @@ const StorageService = {
                 AppState.exchangeRate = data.exchangeRate || 117;
                 AppState.lastRateUpdate = data.lastRateUpdate || null;
                 AppState.lastSalaryEntry = data.lastSalaryEntry || null;
-                // Nova polja
-                AppState.categories = data.categories || DEFAULT_CATEGORIES;
-                AppState.monthlyBudgets = data.monthlyBudgets || [];
-                AppState.savingsGoals = data.savingsGoals || [];
-                AppState.recurringTransactions = data.recurringTransactions || [];
                 console.log('✅ Podaci učitani iz localStorage');
             } else {
                 // Inicijalizuj default kategorije
@@ -159,11 +149,7 @@ const StorageService = {
                 termDeposits: AppState.termDeposits,
                 exchangeRate: AppState.exchangeRate,
                 lastRateUpdate: AppState.lastRateUpdate,
-                lastSalaryEntry: AppState.lastSalaryEntry,
-                categories: AppState.categories,
-                monthlyBudgets: AppState.monthlyBudgets,
-                savingsGoals: AppState.savingsGoals,
-                recurringTransactions: AppState.recurringTransactions
+                lastSalaryEntry: AppState.lastSalaryEntry
             };
             localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
             console.log('✅ Podaci sačuvani u localStorage');
@@ -182,10 +168,6 @@ const StorageService = {
             cashHistoryEUR: AppState.cashHistoryEUR,
             cashHistoryRSD: AppState.cashHistoryRSD,
             termDeposits: AppState.termDeposits,
-            categories: AppState.categories,
-            monthlyBudgets: AppState.monthlyBudgets,
-            savingsGoals: AppState.savingsGoals,
-            recurringTransactions: AppState.recurringTransactions,
             exportDate: new Date().toISOString()
         };
         
@@ -212,10 +194,6 @@ const StorageService = {
                 AppState.cashHistoryEUR = data.cashHistoryEUR || data.cashHistory || [];
                 AppState.cashHistoryRSD = data.cashHistoryRSD || [];
                 AppState.termDeposits = data.termDeposits || [];
-                AppState.categories = data.categories || DEFAULT_CATEGORIES;
-                AppState.monthlyBudgets = data.monthlyBudgets || [];
-                AppState.savingsGoals = data.savingsGoals || [];
-                AppState.recurringTransactions = data.recurringTransactions || [];
                 this.saveState();
                 UIController.refresh();
                 alert('✅ Podaci uspešno importovani!');
@@ -274,7 +252,6 @@ const FinanceModule = {
             description,
             type, // 'income' ili 'expense'
             amount: parseFloat(amount),
-            categoryId,
             date: new Date().toISOString()
         };
         AppState.cardTransactions.push(transaction);
@@ -361,95 +338,6 @@ const FinanceModule = {
      */
     deleteTermDeposit(id) {
         AppState.termDeposits = AppState.termDeposits.filter(d => d.id !== id);
-        StorageService.saveState();
-    },
-    
-    /**
-     * Dodaje mesečni budžet za kategoriju
-     */
-    addMonthlyBudget(categoryId, amount, year, month) {
-        const budget = {
-            id: Date.now(),
-            categoryId,
-            amount: parseFloat(amount),
-            year: parseInt(year),
-            month: parseInt(month),
-            createdAt: new Date().toISOString()
-        };
-        // Proveri da li već postoji budžet za ovu kategoriju u ovom mesecu
-        const existingIndex = AppState.monthlyBudgets.findIndex(
-            b => b.categoryId === categoryId && b.year === year && b.month === month
-        );
-        if (existingIndex >= 0) {
-            AppState.monthlyBudgets[existingIndex] = budget;
-        } else {
-            AppState.monthlyBudgets.push(budget);
-        }
-        StorageService.saveState();
-        console.log('✅ Dodat mesečni budžet:', budget);
-    },
-    
-    /**
-     * Dodaje cilj štednje
-     */
-    addSavingsGoal(name, targetAmount, currentAmount, deadline) {
-        const goal = {
-            id: Date.now(),
-            name,
-            targetAmount: parseFloat(targetAmount),
-            currentAmount: parseFloat(currentAmount || 0),
-            deadline,
-            createdAt: new Date().toISOString()
-        };
-        AppState.savingsGoals.push(goal);
-        StorageService.saveState();
-        console.log('✅ Dodat cilj štednje:', goal);
-    },
-    
-    /**
-     * Ažurira cilj štednje
-     */
-    updateSavingsGoal(id, currentAmount) {
-        const goal = AppState.savingsGoals.find(g => g.id === id);
-        if (goal) {
-            goal.currentAmount = parseFloat(currentAmount);
-            StorageService.saveState();
-        }
-    },
-    
-    /**
-     * Briše cilj štednje
-     */
-    deleteSavingsGoal(id) {
-        AppState.savingsGoals = AppState.savingsGoals.filter(g => g.id !== id);
-        StorageService.saveState();
-    },
-    
-    /**
-     * Dodaje ponavljajuću transakciju
-     */
-    addRecurringTransaction(description, amount, categoryId, frequency, startDate, accountType) {
-        const recurring = {
-            id: Date.now(),
-            description,
-            amount: parseFloat(amount),
-            categoryId,
-            frequency, // 'monthly', 'weekly', 'yearly'
-            startDate,
-            accountType, // 'card', 'cashEUR', 'cashRSD'
-            active: true,
-            createdAt: new Date().toISOString()
-        };
-        AppState.recurringTransactions.push(recurring);
-        StorageService.saveState();
-        console.log('✅ Dodata ponavljajuća transakcija:', recurring);
-    },
-    
-    /**
-     * Briše ponavljajuću transakciju
-     */
-    deleteRecurringTransaction(id) {
-        AppState.recurringTransactions = AppState.recurringTransactions.filter(r => r.id !== id);
         StorageService.saveState();
     }
 };
@@ -578,56 +466,6 @@ const Calculator = {
         });
         
         return summary;
-    },
-    
-    /**
-     * Izračunava potrošnju po kategorijama za određeni period
-     */
-    calculateCategorySpending(year, month) {
-        const spending = {};
-        
-        // Filtriranje transakcija za određeni mesec
-        const transactions = AppState.cardTransactions.filter(t => {
-            const date = new Date(t.date);
-            return date.getFullYear() === year && date.getMonth() + 1 === month && t.type === 'expense';
-        });
-        
-        // Grupisanje po kategorijama
-        transactions.forEach(t => {
-            const categoryId = t.categoryId || 'other-expense';
-            if (!spending[categoryId]) {
-                spending[categoryId] = 0;
-            }
-            spending[categoryId] += t.amount;
-        });
-        
-        return spending;
-    },
-    
-    /**
-     * Provera da li budžet za kategoriju prelazi limit
-     */
-    checkBudgetStatus(categoryId, year, month) {
-        const budget = AppState.monthlyBudgets.find(
-            b => b.categoryId === categoryId && b.year === year && b.month === month
-        );
-        
-        if (!budget) {
-            return { hasBudget: false };
-        }
-        
-        const spending = this.calculateCategorySpending(year, month);
-        const spent = spending[categoryId] || 0;
-        const percentage = (spent / budget.amount) * 100;
-        
-        return {
-            hasBudget: true,
-            limit: budget.amount,
-            spent,
-            remaining: budget.amount - spent,
-            percentage,
-            isOver: spent > budget.amount
-        };
     },
     
     /**
@@ -939,8 +777,6 @@ const UIController = {
         }
         
         if (sectionId === 'dashboard') this.refreshDashboard();
-        if (sectionId === 'budget') this.refreshBudgetOverview();
-        if (sectionId === 'goals') this.refreshGoalsList();
         if (sectionId === 'salary') this.refreshSalaryEntries();
         if (sectionId === 'card') this.refreshCardTransactions();
         if (sectionId === 'cash') this.refreshCashHistory();
@@ -1208,10 +1044,7 @@ const UIController = {
         this.refreshCardTransactions();
         this.refreshCashHistory();
         this.refreshDeposits();
-        this.refreshBudgetOverview();
-        this.refreshGoalsList();
         this.populateYearFilter();
-        this.populateCategorySelects();
         
         // Osvežava grafikone
         if (typeof Chart !== 'undefined') {
@@ -1550,13 +1383,6 @@ const UIController = {
         }
     },
     
-    deleteSavingsGoal(id) {
-        if (confirm('Da li ste sigurni da želite obrisati ovaj cilj?')) {
-            FinanceModule.deleteSavingsGoal(id);
-            this.refresh();
-        }
-    },
-    
     /**
      * Popunjava select-ove sa kategorijama
      */
@@ -1825,8 +1651,7 @@ const ChartModule = {
     charts: {
         wealthPie: null,
         salaryBar: null,
-        salaryLine: null,
-        categorySpending: null
+        salaryLine: null
     },
     
     /**
@@ -2085,96 +1910,6 @@ const ChartModule = {
         this.createWealthPieChart();
         this.createSalaryBarChart();
         this.createSalaryLineChart();
-        this.createCategorySpendingChart();
-    },
-    
-    /**
-     * Kreira grafikon za potrošnju po kategorijama
-     */
-    createCategorySpendingChart() {
-        const ctx = document.getElementById('categorySpendingChart');
-        if (!ctx) return;
-        
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = now.getMonth() + 1;
-        
-        const spending = Calculator.calculateCategorySpending(year, month);
-        
-        // Pripremi podatke
-        const categories = [];
-        const amounts = [];
-        const colors = [];
-        
-        Object.entries(spending).forEach(([categoryId, amount]) => {
-            const category = AppState.categories.find(c => c.id === categoryId);
-            if (category) {
-                categories.push(category.name);
-                amounts.push(amount);
-                colors.push(category.color);
-            }
-        });
-        
-        if (this.charts.categorySpending) {
-            this.charts.categorySpending.destroy();
-        }
-        
-        if (categories.length === 0) {
-            ctx.getContext('2d').clearRect(0, 0, ctx.width, ctx.height);
-            const parent = ctx.parentElement;
-            parent.innerHTML = `<p style="text-align: center; color: var(--alabaster-grey); padding: 40px;">Još nema troškova za ovaj mesec</p>`;
-            return;
-        }
-        
-        this.charts.categorySpending = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: categories,
-                datasets: [{
-                    data: amounts,
-                    backgroundColor: colors,
-                    borderColor: 'rgba(20, 33, 61, 0.8)',
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            color: 'white',
-                            padding: 15,
-                            font: {
-                                size: 12
-                            }
-                        }
-                    },
-                    title: {
-                        display: true,
-                        text: `Potrošnja za ${UIController.getMonthName(month)} ${year}`,
-                        color: 'white',
-                        font: {
-                            size: 16
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const label = context.label || '';
-                                const value = new Intl.NumberFormat('sr-RS', {
-                                    style: 'currency',
-                                    currency: 'RSD',
-                                    minimumFractionDigits: 0
-                                }).format(context.parsed);
-                                return `${label}: ${value}`;
-                            }
-                        }
-                    }
-                }
-            }
-        });
     }
 };
 
