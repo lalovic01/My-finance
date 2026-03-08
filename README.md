@@ -25,7 +25,7 @@ Moderna web aplikacija za praćenje ličnih finansija sa liquid glass dizajnom.
 
 **My Finance** je single-page aplikacija (SPA) kreirana u vanilla JavaScript-u bez korišćenja frameworka. Omogućava kompletno praćenje ličnih finansija sa podrškom za:
 
-- 📊 Mesečne prihode i troškove
+- 💼 Praćenje zarade po mesecima
 - 💳 Tekući račun/karticu
 - 💶 Kućnu gotovinu u EUR
 - 💵 Kućnu gotovinu u RSD
@@ -39,14 +39,16 @@ Moderna web aplikacija za praćenje ličnih finansija sa liquid glass dizajnom.
 ### 1️⃣ Dashboard
 - **Pregled ukupnog bogatstva** u jednom mestu
 - Vizuelni prikaz svih finansijskih kategorija
-- Godišnji pregled prihoda, troškova i balansa
+- Godišnji pregled zarade
 - Real-time ažuriranje svih podataka
+- Grafički prikazi distribuci bogatstva
 
-### 2️⃣ Mesečni Unosi
-- Dodavanje prihoda i troškova po mesecima
+### 2️⃣ Plata/Zarada
+- Dodavanje prihoda po mesecima
 - Filtriranje po godini i mesecu
 - CRUD operacije (Create, Read, Delete)
-- Automatsko izračunavanje salda
+- Statistika zarade kroz godine
+- Grafički pregled mesečnog trenda
 
 ### 3️⃣ Kartica/Račun (RSD)
 - Praćenje primanja (plata)
@@ -140,7 +142,7 @@ Iznos: 25000 RSD
 Sekcija: Oročena Štednja
 Iznos: 100000 RSD
 Trajanje: 12 meseci
-Tip Kamate: Složena kamata
+Tip Kamata: Složena kamata
 Godišnja Kamata: 5.5%
 Datum Početka: 01.01.2024
 ```
