@@ -807,193 +807,225 @@ const UIController = {
      */
     setupForms() {
         // Zarada
-        document.getElementById('salaryForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            // Validation
-            const year = document.getElementById('salaryYear').value;
-            const month = document.getElementById('salaryMonth').value;
-            const description = document.getElementById('salaryDescription').value;
-            const amount = document.getElementById('salaryAmount').value;
-            
-            let isValid = true;
-            
-            if (!year || year < 2020 || year > 2100) {
-                AccessibilityService.updateFormAria('salaryYear', false, 'Godina mora biti između 2020 i 2100');
-                isValid = false;
-            } else {
-                AccessibilityService.updateFormAria('salaryYear', true);
-            }
-            
-            if (!description.trim()) {
-                AccessibilityService.updateFormAria('salaryDescription', false, 'Opis je obavezan');
-                isValid = false;
-            } else {
-                AccessibilityService.updateFormAria('salaryDescription', true);
-            }
-            
-            if (!amount || parseFloat(amount) <= 0) {
-                AccessibilityService.updateFormAria('salaryAmount', false, 'Iznos mora biti veći od 0');
-                isValid = false;
-            } else {
-                AccessibilityService.updateFormAria('salaryAmount', true);
-            }
-            
-            if (!isValid) {
-                AccessibilityService.announce('Molimo ispravite greške u formi', 'assertive', 'salary');
-                return;
-            }
-            
-            FinanceModule.addSalaryEntry(year, month, description, amount);
-            e.target.reset();
-            const now = new Date();
-            document.getElementById('salaryYear').value = now.getFullYear();
-            document.getElementById('salaryMonth').value = now.getMonth() + 1;
-            this.refresh();
-            this.showNotification('✅ Zarada uspešno dodata!', 'success');
-            
-            // Announce to screen readers
-            AccessibilityService.announce(
-                `Zarada od ${amount} dinara za ${this.getMonthName(month)} ${year} je uspešno dodata`,
-                'polite',
-                'salary'
-            );
-            
-            // Focus back to first field
-            document.getElementById('salaryYear').focus();
-        });
+        const salaryForm = document.getElementById('salaryForm');
+        if (salaryForm) {
+            salaryForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                // Validation
+                const year = document.getElementById('salaryYear').value;
+                const month = document.getElementById('salaryMonth').value;
+                const description = document.getElementById('salaryDescription').value;
+                const amount = document.getElementById('salaryAmount').value;
+                
+                let isValid = true;
+                
+                if (!year || year < 2020 || year > 2100) {
+                    AccessibilityService.updateFormAria('salaryYear', false, 'Godina mora biti između 2020 i 2100');
+                    isValid = false;
+                } else {
+                    AccessibilityService.updateFormAria('salaryYear', true);
+                }
+                
+                if (!description.trim()) {
+                    AccessibilityService.updateFormAria('salaryDescription', false, 'Opis je obavezan');
+                    isValid = false;
+                } else {
+                    AccessibilityService.updateFormAria('salaryDescription', true);
+                }
+                
+                if (!amount || parseFloat(amount) <= 0) {
+                    AccessibilityService.updateFormAria('salaryAmount', false, 'Iznos mora biti veći od 0');
+                    isValid = false;
+                } else {
+                    AccessibilityService.updateFormAria('salaryAmount', true);
+                }
+                
+                if (!isValid) {
+                    AccessibilityService.announce('Molimo ispravite greške u formi', 'assertive', 'salary');
+                    return;
+                }
+                
+                FinanceModule.addSalaryEntry(year, month, description, amount);
+                e.target.reset();
+                const now = new Date();
+                document.getElementById('salaryYear').value = now.getFullYear();
+                document.getElementById('salaryMonth').value = now.getMonth() + 1;
+                this.refresh();
+                this.showNotification('✅ Zarada uspešno dodata!', 'success');
+                
+                // Announce to screen readers
+                AccessibilityService.announce(
+                    `Zarada od ${amount} dinara za ${this.getMonthName(month)} ${year} je uspešno dodata`,
+                    'polite',
+                    'salary'
+                );
+                
+                // Focus back to first field
+                document.getElementById('salaryYear').focus();
+            });
+        }
         
         // Dugme za kopiranje prošlog unosa
-        document.getElementById('copyLastSalary').addEventListener('click', () => {
-            if (AppState.lastSalaryEntry) {
-                document.getElementById('salaryDescription').value = AppState.lastSalaryEntry.description;
-                document.getElementById('salaryAmount').value = AppState.lastSalaryEntry.amount;
-                this.showNotification('✅ Podaci kopirani iz prošlog unosa!', 'info');
-            } else {
-                alert('⚠️ Nema prethodnog unosa za kopiranje!');
-            }
-        });
+        const copyLastSalary = document.getElementById('copyLastSalary');
+        if (copyLastSalary) {
+            copyLastSalary.addEventListener('click', () => {
+                if (AppState.lastSalaryEntry) {
+                    document.getElementById('salaryDescription').value = AppState.lastSalaryEntry.description;
+                    document.getElementById('salaryAmount').value = AppState.lastSalaryEntry.amount;
+                    this.showNotification('✅ Podaci kopirani iz prošlog unosa!', 'info');
+                } else {
+                    alert('⚠️ Nema prethodnog unosa za kopiranje!');
+                }
+            });
+        }
         
         // Kartica
-        document.getElementById('cardForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const description = document.getElementById('cardDescription').value;
-            const type = document.getElementById('cardType').value;
-            const amount = document.getElementById('cardAmount').value;
-            const categoryId = document.getElementById('cardCategory').value;
-            
-            // Validacija
-            if (parseFloat(amount) <= 0) {
-                alert('⚠️ Iznos mora biti veći od 0!');
-                return;
-            }
-            
-            FinanceModule.addCardTransaction(description, type, amount, categoryId || null);
-            e.target.reset();
-            this.refresh();
-            this.showNotification('✅ Transakcija uspešno dodata!', 'success');
-        });
+        const cardForm = document.getElementById('cardForm');
+        if (cardForm) {
+            cardForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const description = document.getElementById('cardDescription').value;
+                const type = document.getElementById('cardType').value;
+                const amount = document.getElementById('cardAmount').value;
+                const categoryId = document.getElementById('cardCategory').value;
+                
+                // Validacija
+                if (parseFloat(amount) <= 0) {
+                    alert('⚠️ Iznos mora biti veći od 0!');
+                    return;
+                }
+                
+                FinanceModule.addCardTransaction(description, type, amount, categoryId || null);
+                e.target.reset();
+                this.refresh();
+                this.showNotification('✅ Transakcija uspešno dodata!', 'success');
+            });
+        }
         
         // Gotovina EUR
-        document.getElementById('cashFormEUR').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const description = document.getElementById('cashDescriptionEUR').value;
-            const type = document.getElementById('cashTypeEUR').value;
-            const amount = document.getElementById('cashAmountEUR').value;
-            
-            if (parseFloat(amount) <= 0) {
-                alert('⚠️ Iznos mora biti veći od 0!');
-                return;
-            }
-            
-            FinanceModule.addCashChangeEUR(description, type, amount);
-            e.target.reset();
-            this.refresh();
-            this.showNotification('✅ Promena EUR gotovine uspešno sačuvana!', 'success');
-        });
+        const cashFormEUR = document.getElementById('cashFormEUR');
+        if (cashFormEUR) {
+            cashFormEUR.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const description = document.getElementById('cashDescriptionEUR').value;
+                const type = document.getElementById('cashTypeEUR').value;
+                const amount = document.getElementById('cashAmountEUR').value;
+                
+                if (parseFloat(amount) <= 0) {
+                    alert('⚠️ Iznos mora biti veći od 0!');
+                    return;
+                }
+                
+                FinanceModule.addCashChangeEUR(description, type, amount);
+                e.target.reset();
+                this.refresh();
+                this.showNotification('✅ Promena EUR gotovine uspešno sačuvana!', 'success');
+            });
+        }
         
         // Gotovina RSD
-        document.getElementById('cashFormRSD').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const description = document.getElementById('cashDescriptionRSD').value;
-            const type = document.getElementById('cashTypeRSD').value;
-            const amount = document.getElementById('cashAmountRSD').value;
-            
-            if (parseFloat(amount) <= 0) {
-                alert('⚠️ Iznos mora biti veći od 0!');
-                return;
-            }
-            
-            FinanceModule.addCashChangeRSD(description, type, amount);
-            e.target.reset();
-            this.refresh();
-            this.showNotification('✅ Promena RSD gotovine uspešno sačuvana!', 'success');
-        });
+        const cashFormRSD = document.getElementById('cashFormRSD');
+        if (cashFormRSD) {
+            cashFormRSD.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const description = document.getElementById('cashDescriptionRSD').value;
+                const type = document.getElementById('cashTypeRSD').value;
+                const amount = document.getElementById('cashAmountRSD').value;
+                
+                if (parseFloat(amount) <= 0) {
+                    alert('⚠️ Iznos mora biti veći od 0!');
+                    return;
+                }
+                
+                FinanceModule.addCashChangeRSD(description, type, amount);
+                e.target.reset();
+                this.refresh();
+                this.showNotification('✅ Promena RSD gotovine uspešno sačuvana!', 'success');
+            });
+        }
         
         // Depoziti
-        document.getElementById('depositForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const amount = document.getElementById('depositAmount').value;
-            const duration = document.getElementById('depositDuration').value;
-            const interestType = document.getElementById('depositInterestType').value;
-            const interestRate = document.getElementById('depositInterestRate').value;
-            const startDate = document.getElementById('depositStartDate').value;
-            
-            // Validacija
-            if (parseFloat(amount) <= 0 || parseFloat(interestRate) <= 0) {
-                alert('⚠️ Iznos i kamata moraju biti veći od 0!');
-                return;
-            }
-            
-            FinanceModule.addTermDeposit(amount, duration, interestType, interestRate, startDate);
-            e.target.reset();
-            document.getElementById('depositStartDate').value = new Date().toISOString().split('T')[0];
-            this.refresh();
-            this.showNotification('✅ Depozit uspešno dodat!', 'success');
-        });
+        const depositForm = document.getElementById('depositForm');
+        if (depositForm) {
+            depositForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const amount = document.getElementById('depositAmount').value;
+                const duration = document.getElementById('depositDuration').value;
+                const interestType = document.getElementById('depositInterestType').value;
+                const interestRate = document.getElementById('depositInterestRate').value;
+                const startDate = document.getElementById('depositStartDate').value;
+                
+                // Validacija
+                if (parseFloat(amount) <= 0 || parseFloat(interestRate) <= 0) {
+                    alert('⚠️ Iznos i kamata moraju biti veći od 0!');
+                    return;
+                }
+                
+                FinanceModule.addTermDeposit(amount, duration, interestType, interestRate, startDate);
+                e.target.reset();
+                document.getElementById('depositStartDate').value = new Date().toISOString().split('T')[0];
+                this.refresh();
+                this.showNotification('✅ Depozit uspešno dodat!', 'success');
+            });
+        }
         
         // Filteri
-        document.getElementById('filterYear').addEventListener('change', () => this.refreshSalaryEntries());
-        document.getElementById('filterMonth').addEventListener('change', () => this.refreshSalaryEntries());
+        const filterYear = document.getElementById('filterYear');
+        const filterMonth = document.getElementById('filterMonth');
+        
+        if (filterYear) {
+            filterYear.addEventListener('change', () => this.refreshSalaryEntries());
+        }
+        
+        if (filterMonth) {
+            filterMonth.addEventListener('change', () => this.refreshSalaryEntries());
+        }
         
         // Budget forma
-        document.getElementById('budgetForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const categoryId = document.getElementById('budgetCategory').value;
-            const amount = document.getElementById('budgetAmount').value;
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = now.getMonth() + 1;
-            
-            if (!categoryId || parseFloat(amount) <= 0) {
-                alert('⚠️ Izaberite kategoriju i unesite ispravan iznos!');
-                return;
-            }
-            
-            FinanceModule.addMonthlyBudget(categoryId, amount, year, month);
-            e.target.reset();
-            this.refresh();
-            this.showNotification('✅ Budžet uspešno postavljen!', 'success');
-        });
+        const budgetForm = document.getElementById('budgetForm');
+        if (budgetForm) {
+            budgetForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const categoryId = document.getElementById('budgetCategory').value;
+                const amount = document.getElementById('budgetAmount').value;
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = now.getMonth() + 1;
+                
+                if (!categoryId || parseFloat(amount) <= 0) {
+                    alert('⚠️ Izaberite kategoriju i unesite ispravan iznos!');
+                    return;
+                }
+                
+                FinanceModule.addMonthlyBudget(categoryId, amount, year, month);
+                e.target.reset();
+                this.refresh();
+                this.showNotification('✅ Budžet uspešno postavljen!', 'success');
+            });
+        }
         
         // Goals forma
-        document.getElementById('goalsForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const name = document.getElementById('goalName').value;
-            const targetAmount = document.getElementById('goalTarget').value;
-            const currentAmount = document.getElementById('goalCurrent').value;
-            const deadline = document.getElementById('goalDeadline').value;
-            
-            if (!name.trim() || parseFloat(targetAmount) <= 0) {
-                alert('⚠️ Unesite naziv i ciljni iznos!');
-                return;
-            }
-            
-            FinanceModule.addSavingsGoal(name, targetAmount, currentAmount, deadline);
-            e.target.reset();
-            this.refresh();
-            this.showNotification('✅ Cilj uspešno dodat!', 'success');
-        });
+        const goalsForm = document.getElementById('goalsForm');
+        if (goalsForm) {
+            goalsForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = document.getElementById('goalName').value;
+                const targetAmount = document.getElementById('goalTarget').value;
+                const currentAmount = document.getElementById('goalCurrent').value;
+                const deadline = document.getElementById('goalDeadline').value;
+                
+                if (!name.trim() || parseFloat(targetAmount) <= 0) {
+                    alert('⚠️ Unesite naziv i ciljni iznos!');
+                    return;
+                }
+                
+                FinanceModule.addSavingsGoal(name, targetAmount, currentAmount, deadline);
+                e.target.reset();
+                this.refresh();
+                this.showNotification('✅ Cilj uspešno dodat!', 'success');
+            });
+        }
     },
     
     /**
